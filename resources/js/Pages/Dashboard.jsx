@@ -13,6 +13,7 @@ import HonorsAwardsStep from './Components/HonorsAwardsStep';
 import CreativeWorksStep from './Components/CreativeWorksStep';
 import LifelongLearningStep from './Components/LifelongLearningStep';
 import EssayStep from './Components/EssayStep';
+import ConfirmationStep from './Components/ConfirmationStep';
 import { validateStep } from '@/Utils/formValidations';
 import axios from 'axios';
 
@@ -24,7 +25,8 @@ const STEPS = [
     { number: 5, title: 'Honors & Awards' },
     { number: 6, title: 'Creative Works' },
     { number: 7, title: 'Lifelong Learning' },
-    { number: 8, title: 'Essay' }
+    { number: 8, title: 'Essay' },
+    { number: 9, title: 'Confirmation' }
 ];
 
 export default function MultiStepForm() {
@@ -342,16 +344,28 @@ export default function MultiStepForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (currentStep < STEPS.length) {
+        if (currentStep < STEPS.length - 1) {
             handleNext();
         } else {
+            setLoading(true);
             try {
-                await axios.post('/application/finalize', {
-                    applicant_id: formData.applicant_id
+                const response = await axios.post('/application/finalize', {
+                    applicant_id: formData.applicant_id,
+                    status: 'pending'
                 });
-                // Handle successful submission
+                
+                setFormData(prev => ({
+                    ...prev,
+                    status: 'pending'
+                }));
+                
+                setCurrentStep(STEPS.length);
+                setLoading(false);
             } catch (error) {
-                // Handle error
+                setLoading(false);
+                setErrors({
+                    submit: 'Failed to submit application. Please try again.'
+                });
             }
         }
     };
@@ -452,6 +466,8 @@ export default function MultiStepForm() {
                     errors={errors} 
                     handleInputChange={handleInputChange}
                 />;
+            case 9:
+                return <ConfirmationStep formData={formData} />;
             default:
                 return null;
         }

@@ -333,10 +333,13 @@ class ApplicationController extends Controller
                 throw new \Exception('Learning objectives section is incomplete');
             }
 
-            // Update application status
-            $personalInfo->update(['status' => 'submitted']);
+            // Update application status to pending
+            $personalInfo->update(['status' => 'pending']);
 
-            return response()->json(['message' => 'Application submitted successfully']);
+            return response()->json([
+                'message' => 'Application submitted successfully',
+                'status' => 'pending'
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
