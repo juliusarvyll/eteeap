@@ -147,80 +147,115 @@ class ApplicationController extends Controller
                         }
                     }
 
-                    // Create or update main education record
-                    $education = Education::updateOrCreate(
-                        ['applicant_id' => $request->applicant_id],
-                        [
-                            'elementary_school' => $validatedData['elementarySchool'],
-                            'elementary_address' => $validatedData['elementaryAddress'],
-                            'elementary_date_from' => $validatedData['elementaryDateFrom'],
-                            'elementary_date_to' => $validatedData['elementaryDateTo'],
-                            'has_elementary_diploma' => $validatedData['hasElementaryDiploma'],
-                            'elementary_diploma_file' => $files['elementaryDiplomaFile'] ?? null,
-                            'has_high_school_diploma' => $validatedData['hasHighSchoolDiploma'],
-                            'high_school_diploma_file' => $files['highSchoolDiplomaFile'] ?? null,
-                            'has_pept' => $validatedData['hasPEPT'],
-                            'pept_year' => $validatedData['peptYear'],
-                            'pept_grade' => $validatedData['peptGrade'],
-                            'has_post_secondary_diploma' => $validatedData['hasPostSecondaryDiploma'],
-                            'post_secondary_diploma_file' => $files['postSecondaryDiplomaFile'] ?? null,
-                        ]
-                    );
-
-                    // Handle related records
-                    $education->highSchools()->delete();
-                    foreach ($validatedData['highSchools'] as $school) {
-                        $education->highSchools()->create($school);
-                    }
-
-                    if (!empty($validatedData['postSecondary'])) {
-                        $education->postSecondaryEducation()->delete();
-                        foreach ($validatedData['postSecondary'] as $postSecondary) {
-                            $education->postSecondaryEducation()->create($postSecondary);
-                        }
-                    }
-
-                    if (!empty($validatedData['nonFormalEducation'])) {
-                        $education->nonFormalEducation()->delete();
-                        foreach ($validatedData['nonFormalEducation'] as $nonFormal) {
-                            $education->nonFormalEducation()->create($nonFormal);
-                        }
-                    }
-
-                    if (!empty($validatedData['certifications'])) {
-                        $education->certifications()->delete();
-                        foreach ($validatedData['certifications'] as $certification) {
-                            $education->certifications()->create($certification);
-                        }
-                    }
-
-                    // After creating/updating education records
-                    $response = [
+                    // Save Elementary
+                    Education::create([
                         'applicant_id' => $request->applicant_id,
-                        'education' => [
-                            'elementary_school' => $validatedData['elementarySchool'],
-                            'elementary_address' => $validatedData['elementaryAddress'],
-                            'elementary_date_from' => $validatedData['elementaryDateFrom'],
-                            'elementary_date_to' => $validatedData['elementaryDateTo'],
-                            'has_elementary_diploma' => $validatedData['hasElementaryDiploma'],
-                            'elementary_diploma_file' => $files['elementaryDiplomaFile'] ?? null,
-                            'has_high_school_diploma' => $validatedData['hasHighSchoolDiploma'],
-                            'high_school_diploma_file' => $files['highSchoolDiplomaFile'] ?? null,
-                            'has_pept' => $validatedData['hasPEPT'],
-                            'pept_year' => $validatedData['peptYear'],
-                            'pept_grade' => $validatedData['peptGrade'],
-                            'has_post_secondary_diploma' => $validatedData['hasPostSecondaryDiploma'],
-                            'post_secondary_diploma_file' => $files['postSecondaryDiplomaFile'] ?? null,
-                            'high_schools' => $validatedData['highSchools'],
-                            'post_secondary' => $validatedData['postSecondary'] ?? [],
-                            'non_formal_education' => $validatedData['nonFormalEducation'] ?? [],
-                            'certifications' => $validatedData['certifications'] ?? []
-                        ]
-                    ];
+                        'type' => 'elementary',
+                        'school_name' => $validatedData['elementarySchool'],
+                        'address' => $validatedData['elementaryAddress'],
+                        'date_from' => $validatedData['elementaryDateFrom'],
+                        'date_to' => $validatedData['elementaryDateTo'],
+                        'has_diploma' => $validatedData['hasElementaryDiploma'],
+                        'diploma_file' => $files['elementaryDiplomaFile'] ?? null,
+                    ]);
+
+                    // Save High Schools
+                    foreach ($validatedData['highSchools'] as $school) {
+                        Education::create([
+                            'applicant_id' => $request->applicant_id,
+                            'type' => 'high_school',
+                            'school_name' => $school['name'],
+                            'address' => $school['address'],
+                            'school_type' => $school['type'],
+                            'date_from' => $school['dateFrom'],
+                            'date_to' => $school['dateTo'],
+                            'has_diploma' => $validatedData['hasHighSchoolDiploma'],
+                            'diploma_file' => $files['highSchoolDiplomaFile'] ?? null,
+                        ]);
+                    }
+
+                    // Save Post Secondary
+                    if (!empty($validatedData['postSecondary'])) {
+                        foreach ($validatedData['postSecondary'] as $postSecondary) {
+                            Education::create([
+                                'applicant_id' => $request->applicant_id,
+                                'type' => 'post_secondary',
+                                'program' => $postSecondary['program'],
+                                'institution' => $postSecondary['institution'],
+                                'school_year' => $postSecondary['schoolYear'],
+                                'has_diploma' => $validatedData['hasPostSecondaryDiploma'],
+                                'diploma_file' => $files['postSecondaryDiplomaFile'] ?? null,
+                            ]);
+                        }
+                    }
+
+                    // Save Non-Formal Education
+                    if (!empty($validatedData['nonFormalEducation'])) {
+                        foreach ($validatedData['nonFormalEducation'] as $nonFormal) {
+                            Education::create([
+                                'applicant_id' => $request->applicant_id,
+                                'type' => 'non_formal',
+                                'title' => $nonFormal['title'],
+                                'organization' => $nonFormal['organization'],
+                                'date_from' => $nonFormal['date'],
+                                'certificate' => $nonFormal['certificate'],
+                                'participation' => $nonFormal['participation'],
+                            ]);
+                        }
+                    }
+
+                    // Save Certifications
+                    if (!empty($validatedData['certifications'])) {
+                        foreach ($validatedData['certifications'] as $cert) {
+                            Education::create([
+                                'applicant_id' => $request->applicant_id,
+                                'type' => 'certification',
+                                'title' => $cert['title'],
+                                'agency' => $cert['agency'],
+                                'date_certified' => $cert['dateCertified'],
+                                'rating' => $cert['rating'],
+                            ]);
+                        }
+                    }
+
                     break;
 
                 case 4: // Work Experience
-                    // Add work experience validation and processing here
+                    $validatedData = $request->validate([
+                        'applicant_id' => 'required|exists:personal_infos,applicant_id',
+                        'workExperiences' => 'required|array|min:1',
+                        'workExperiences.*.designation' => 'required|string|max:255',
+                        'workExperiences.*.dateFrom' => 'required|date',
+                        'workExperiences.*.dateTo' => 'required|date|after_or_equal:workExperiences.*.dateFrom',
+                        'workExperiences.*.companyName' => 'required|string|max:255',
+                        'workExperiences.*.companyAddress' => 'required|string',
+                        'workExperiences.*.employmentStatus' => 'required|string|max:255',
+                        'workExperiences.*.supervisorName' => 'required|string|max:255',
+                        'workExperiences.*.reasonForLeaving' => 'required|string',
+                        'workExperiences.*.responsibilities' => 'required|string',
+                        'workExperiences.*.references' => 'required|array|size:3',
+                        'workExperiences.*.references.*' => 'required|string|max:255',
+                    ]);
+
+                    // Delete existing records first
+                    WorkExperience::where('applicant_id', $request->applicant_id)->delete();
+
+                    // Create new records
+                    foreach ($validatedData['workExperiences'] as $experience) {
+                        WorkExperience::create([
+                            'applicant_id' => $request->applicant_id,
+                            'designation' => $experience['designation'],
+                            'dateFrom' => $experience['dateFrom'],
+                            'dateTo' => $experience['dateTo'],
+                            'companyName' => $experience['companyName'],
+                            'companyAddress' => $experience['companyAddress'],
+                            'employmentStatus' => $experience['employmentStatus'],
+                            'supervisorName' => $experience['supervisorName'],
+                            'reasonForLeaving' => $experience['reasonForLeaving'],
+                            'responsibilities' => $experience['responsibilities'],
+                            'references' => $experience['references']
+                        ]);
+                    }
                     break;
 
                 case 5: // Honors and Awards
@@ -316,10 +351,7 @@ class ApplicationController extends Controller
         try {
             $personalInfo = PersonalInfo::with([
                 'learningObjective',
-                'education.highSchools',
-                'education.postSecondaryEducation',
-                'education.nonFormalEducation',
-                'education.certifications',
+                'education', // Just load all education records - they're differentiated by 'type'
                 'academicAwards',
                 'communityAwards',
                 'workAwards'

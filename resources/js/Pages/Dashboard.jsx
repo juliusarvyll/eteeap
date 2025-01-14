@@ -256,15 +256,67 @@ export default function MultiStepForm() {
                     completionTimeline: formData.completionTimeline
                 };
 
-            case 3: // Work Experience
+            case 3: // Education
+                return {
+                    applicant_id: formData.applicant_id,
+                    // Elementary
+                    elementarySchool: formData.elementarySchool,
+                    elementaryAddress: formData.elementaryAddress,
+                    elementaryDateFrom: formData.elementaryDateFrom,
+                    elementaryDateTo: formData.elementaryDateTo,
+                    hasElementaryDiploma: formData.hasElementaryDiploma,
+                    elementaryDiplomaFile: formData.elementaryDiplomaFile,
+
+                    // High School
+                    hasHighSchoolDiploma: formData.hasHighSchoolDiploma,
+                    highSchoolDiplomaFile: formData.highSchoolDiplomaFile,
+                    highSchools: formData.highSchools.filter(school => 
+                        school.name || school.address
+                    ),
+
+                    // PEPT
+                    hasPEPT: formData.hasPEPT,
+                    peptYear: formData.peptYear,
+                    peptGrade: formData.peptGrade,
+
+                    // Post Secondary
+                    hasPostSecondaryDiploma: formData.hasPostSecondaryDiploma,
+                    postSecondaryDiplomaFile: formData.postSecondaryDiplomaFile,
+                    postSecondary: formData.postSecondary.filter(edu => 
+                        edu.program || edu.institution
+                    ),
+
+                    // Non-Formal Education
+                    nonFormalEducation: formData.nonFormalEducation.filter(edu => 
+                        edu.title || edu.organization
+                    ),
+
+                    // Certifications
+                    certifications: formData.certifications.filter(cert => 
+                        cert.title || cert.agency
+                    )
+                };
+
+            case 4: // Work Experience
                 return {
                     applicant_id: formData.applicant_id,
                     workExperiences: formData.workExperiences.filter(exp => 
                         exp.designation || exp.companyName
-                    )
+                    ).map(exp => ({
+                        designation: exp.designation,
+                        dateFrom: exp.dateFrom,
+                        dateTo: exp.dateTo,
+                        companyName: exp.companyName,
+                        companyAddress: exp.companyAddress,
+                        employmentStatus: exp.employmentStatus,
+                        supervisorName: exp.supervisorName,
+                        reasonForLeaving: exp.reasonForLeaving,
+                        responsibilities: exp.responsibilities,
+                        references: exp.references
+                    }))
                 };
 
-            case 4: // Awards
+            case 5: // Awards
                 return {
                     applicant_id: formData.applicant_id,
                     academicAwards: formData.academicAwards.filter(award => 
@@ -278,7 +330,6 @@ export default function MultiStepForm() {
                     )
                 };
 
-            // Add other steps as needed...
             
             default:
                 return {};

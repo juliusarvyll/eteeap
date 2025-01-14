@@ -22,9 +22,9 @@ class WorkExperience extends Model
     ];
 
     protected $casts = [
+        'references' => 'array',
         'dateFrom' => 'date',
-        'dateTo' => 'date',
-        'references' => 'array'
+        'dateTo' => 'date'
     ];
 
     public function personalInfo(): BelongsTo
