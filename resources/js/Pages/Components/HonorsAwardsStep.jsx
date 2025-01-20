@@ -1,103 +1,138 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
+import TextArea from '@/Components/TextArea';
 import PrimaryButton from '@/Components/PrimaryButton';
 
-export default function HonorsAwardsStep({ 
-    formData, 
-    errors, 
+export default function HonorsAwardsStep({
+    formData,
+    errors,
+    handleInputChange,
     handleArrayFieldChange,
     addArrayItem,
-    removeArrayItem 
+    removeArrayItem
 }) {
     return (
         <div className="space-y-8">
             <div>
                 <h2 className="text-xl font-bold mb-4">IV. HONORS, AWARDS AND CITATIONS RECEIVED</h2>
                 <p className="text-sm text-gray-600 mb-6">
-                    In this section, please describe all the awards you have received from schools, 
-                    community and civic organizations, as well as citations for work excellence, 
+                    In this section, please describe all the awards you have received from schools,
+                    community and civic organizations, as well as citations for work excellence,
                     outstanding accomplishments, community service, etc.
                 </p>
             </div>
 
-            {/* A. Academic Awards */}
+            {/* Academic Awards */}
             <section className="space-y-4">
-                <h3 className="text-lg font-semibold">A. ACADEMIC AWARDS</h3>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Award Conferred
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Name & Address of Conferring Organization
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Date Awarded
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {formData.academicAwards.map((award, index) => (
-                                <tr key={index}>
-                                    <td className="px-6 py-4">
-                                        <TextInput
-                                            value={award.title}
-                                            className="block w-full"
-                                            onChange={(e) => handleArrayFieldChange('academicAwards', index, 'title', e.target.value)}
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <TextInput
-                                            value={award.organization}
-                                            className="block w-full"
-                                            onChange={(e) => handleArrayFieldChange('academicAwards', index, 'organization', e.target.value)}
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <TextInput
-                                            type="date"
-                                            value={award.dateAwarded}
-                                            className="block w-full"
-                                            onChange={(e) => handleArrayFieldChange('academicAwards', index, 'dateAwarded', e.target.value)}
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {formData.academicAwards.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => removeArrayItem('academicAwards', index)}
-                                                className="text-red-600 hover:text-red-800"
-                                            >
-                                                Remove
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <h2 className="text-xl font-bold">Academic Awards and Honors</h2>
+                <p className="text-sm text-gray-600">List any academic awards, honors, or recognition you have received.</p>
+
+                {formData.academicAwards?.map((award, index) => (
+                    <div key={index} className="border p-4 rounded-lg space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-lg font-semibold">Award {index + 1}</h3>
+                            {index > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => removeArrayItem('academicAwards', index)}
+                                    className="text-red-600 hover:text-red-800"
+                                >
+                                    Remove
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <InputLabel value="Award/Honor Title" required />
+                                <TextInput
+                                    name="title"
+                                    value={award.title}
+                                    onChange={(e) => handleArrayFieldChange('academicAwards', index, 'title', e.target.value)}
+                                    className={`mt-1 block w-full ${errors[`academicAwards.${index}.title`] ? 'border-red-500' : ''}`}
+                                />
+                                {errors[`academicAwards.${index}.title`] && (
+                                    <InputError message={errors[`academicAwards.${index}.title`]} className="mt-2" />
+                                )}
+                            </div>
+
+                            <div>
+                                <InputLabel value="Awarding Institution" required />
+                                <TextInput
+                                    name="institution"
+                                    value={award.institution}
+                                    onChange={(e) => handleArrayFieldChange('academicAwards', index, 'institution', e.target.value)}
+                                    className={`mt-1 block w-full ${errors[`academicAwards.${index}.institution`] ? 'border-red-500' : ''}`}
+                                />
+                                {errors[`academicAwards.${index}.institution`] && (
+                                    <InputError message={errors[`academicAwards.${index}.institution`]} className="mt-2" />
+                                )}
+                            </div>
+
+                            <div>
+                                <InputLabel value="Date Received" required />
+                                <TextInput
+                                    type="date"
+                                    name="dateReceived"
+                                    value={award.dateReceived}
+                                    onChange={(e) => handleArrayFieldChange('academicAwards', index, 'dateReceived', e.target.value)}
+                                    className={`mt-1 block w-full ${errors[`academicAwards.${index}.dateReceived`] ? 'border-red-500' : ''}`}
+                                />
+                                {errors[`academicAwards.${index}.dateReceived`] && (
+                                    <InputError message={errors[`academicAwards.${index}.dateReceived`]} className="mt-2" />
+                                )}
+                            </div>
+
+                            <div>
+                                <InputLabel value="Description" required />
+                                <TextArea
+                                    name="description"
+                                    value={award.description}
+                                    onChange={(e) => handleArrayFieldChange('academicAwards', index, 'description', e.target.value)}
+                                    className={`mt-1 block w-full ${errors[`academicAwards.${index}.description`] ? 'border-red-500' : ''}`}
+                                    rows={3}
+                                />
+                                {errors[`academicAwards.${index}.description`] && (
+                                    <InputError message={errors[`academicAwards.${index}.description`]} className="mt-2" />
+                                )}
+                            </div>
+
+                            <div>
+                                <InputLabel value="Supporting Document" />
+                                <input
+                                    type="file"
+                                    name="document"
+                                    onChange={(e) => handleArrayFieldChange('academicAwards', index, 'document', e.target.files[0])}
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    className={`mt-1 block w-full ${errors[`academicAwards.${index}.document`] ? 'border-red-500' : ''}`}
+                                />
+                                <p className="text-sm text-gray-500 mt-1">Upload certificate or proof of award (PDF, JPG, PNG max 2MB)</p>
+                                {errors[`academicAwards.${index}.document`] && (
+                                    <InputError message={errors[`academicAwards.${index}.document`]} className="mt-2" />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
                 <PrimaryButton
                     type="button"
                     onClick={() => addArrayItem('academicAwards', {
                         title: '',
-                        organization: '',
-                        dateAwarded: ''
+                        institution: '',
+                        dateReceived: '',
+                        description: '',
+                        document: null
                     })}
                 >
                     Add Academic Award
                 </PrimaryButton>
             </section>
 
-            {/* B. Community Awards */}
+            {/* Community Awards */}
             <section className="space-y-4">
-                <h3 className="text-lg font-semibold">B. COMMUNITY AND CIVIC ORGANIZATION AWARD / CITATION</h3>
+                <h2 className="text-xl font-bold">Community Service Awards</h2>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -169,9 +204,9 @@ export default function HonorsAwardsStep({
                 </PrimaryButton>
             </section>
 
-            {/* C. Work Related Awards */}
+            {/* Work-Related Awards */}
             <section className="space-y-4">
-                <h3 className="text-lg font-semibold">C. WORK RELATED AWARD / CITATION</h3>
+                <h2 className="text-xl font-bold">Work-Related Awards</h2>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -244,4 +279,4 @@ export default function HonorsAwardsStep({
             </section>
         </div>
     );
-} 
+}

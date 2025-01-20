@@ -13,6 +13,9 @@ use App\Models\HighSchool;
 use App\Models\PostSecondaryEducation;
 use App\Models\NonFormalEducation;
 use App\Models\Certification;
+use App\Models\CreativeWork;
+use App\Models\LifelongLearning;
+use App\Models\Essay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -46,13 +49,15 @@ class ApplicationController extends Controller
                         'firstName' => 'required|string|max:255',
                         'middleName' => 'nullable|string|max:255',
                         'lastName' => 'required|string|max:255',
-                        'suffix' => 'nullable|string|max:255',
+                        'address' => 'required|string',
+                        'zipCode' => 'required|string|max:20',
+                        'contactNumber' => 'required|string|max:50',
                         'birthDate' => 'required|date',
-                        'placeOfBirth' => 'required|string|max:255',
+                        'birthPlace' => 'required|string|max:255',
                         'civilStatus' => 'required|string|in:Single,Married,Separated,Widow,Divorced',
                         'document' => $request->hasFile('document') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
                         'sex' => 'required|string|in:Male,Female',
-                        'religion' => 'nullable|string|max:255',
+                        'nationality' => 'required|string|max:255',
                         'languages' => 'required|string|max:255'
                     ]);
 
@@ -99,7 +104,7 @@ class ApplicationController extends Controller
                         'elementaryDateTo' => 'required|date|after:elementaryDateFrom',
                         'hasElementaryDiploma' => 'required|boolean',
                         'elementaryDiplomaFile' => $request->hasFile('elementaryDiplomaFile') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
-                        
+
                         // High School
                         'hasHighSchoolDiploma' => 'required|boolean',
                         'highSchoolDiplomaFile' => $request->hasFile('highSchoolDiplomaFile') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
@@ -109,12 +114,12 @@ class ApplicationController extends Controller
                         'highSchools.*.type' => 'required|string',
                         'highSchools.*.dateFrom' => 'required|date',
                         'highSchools.*.dateTo' => 'required|date|after:highSchools.*.dateFrom',
-                        
+
                         // PEPT
                         'hasPEPT' => 'required|boolean',
                         'peptYear' => 'required_if:hasPEPT,true|nullable|integer',
                         'peptGrade' => 'required_if:hasPEPT,true|nullable|string',
-                        
+
                         // Post Secondary
                         'hasPostSecondaryDiploma' => 'required|boolean',
                         'postSecondaryDiplomaFile' => $request->hasFile('postSecondaryDiplomaFile') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
@@ -122,7 +127,7 @@ class ApplicationController extends Controller
                         'postSecondary.*.program' => 'required|string',
                         'postSecondary.*.institution' => 'required|string',
                         'postSecondary.*.schoolYear' => 'required|string',
-                        
+
                         // Non-Formal Education
                         'nonFormalEducation' => 'array',
                         'nonFormalEducation.*.title' => 'required|string',
@@ -130,7 +135,7 @@ class ApplicationController extends Controller
                         'nonFormalEducation.*.date' => 'required|date',
                         'nonFormalEducation.*.certificate' => 'required|string',
                         'nonFormalEducation.*.participation' => 'required|string',
-                        
+
                         // Certifications
                         'certifications' => 'array',
                         'certifications.*.title' => 'required|string',
@@ -305,6 +310,104 @@ class ApplicationController extends Controller
                         }
                     }
                     break;
+
+                case 6: // Creative Works
+                    $validatedData = $request->validate([
+                        'applicant_id' => 'required|exists:personal_infos,applicant_id',
+                        'creativeWorks' => 'required|array|min:1',
+                        'creativeWorks.*.title' => 'required|string|max:255',
+                        'creativeWorks.*.description' => 'required|string',
+                        'creativeWorks.*.significance' => 'required|string',
+                        'creativeWorks.*.dateCompleted' => 'required|date',
+                        'creativeWorks.*.corroboratingBody' => 'required|string|max:255',
+                    ]);
+
+                    // Delete existing records first
+                    CreativeWork::where('applicant_id', $request->applicant_id)->delete();
+
+                    // Create new records
+                    foreach ($validatedData['creativeWorks'] as $work) {
+                        CreativeWork::create([
+                            'applicant_id' => $request->applicant_id,
+                            'title' => $work['title'],
+                            'description' => $work['description'],
+                            'significance' => $work['significance'],
+                            'date_completed' => $work['dateCompleted'],
+                            'corroborating_body' => $work['corroboratingBody']
+                        ]);
+                    }
+                    break;
+
+                case 7: // Lifelong Learning
+                    $validatedData = $request->validate([
+                        'applicant_id' => 'required|exists:personal_infos,applicant_id',
+                        'hobbies' => 'present|array',
+                        'hobbies.*.description' => 'required|string',
+                        'specialSkills' => 'present|array',
+                        'specialSkills.*.description' => 'required|string',
+                        'workActivities' => 'present|array',
+                        'workActivities.*.description' => 'required|string',
+                        'volunteerActivities' => 'present|array',
+                        'volunteerActivities.*.description' => 'required|string',
+                        'travels' => 'present|array',
+                        'travels.*.description' => 'required|string'
+                    ]);
+
+                    // Ensure at least one category has entries
+                    if (empty($validatedData['hobbies']) &&
+                        empty($validatedData['specialSkills']) &&
+                        empty($validatedData['workActivities']) &&
+                        empty($validatedData['volunteerActivities']) &&
+                        empty($validatedData['travels'])) {
+                        return response()->json([
+                            'error' => 'At least one lifelong learning experience is required'
+                        ], 422);
+                    }
+
+                    // Delete existing records first
+                    LifelongLearning::where('applicant_id', $request->applicant_id)->delete();
+
+                    // Helper function to save experiences
+                    $saveExperiences = function($experiences, $type) use ($request) {
+                        foreach ($experiences as $experience) {
+                            LifelongLearning::create([
+                                'applicant_id' => $request->applicant_id,
+                                'type' => $type,
+                                'description' => $experience['description']
+                            ]);
+                        }
+                    };
+
+                    // Save all categories
+                    if (!empty($validatedData['hobbies'])) {
+                        $saveExperiences($validatedData['hobbies'], 'hobby');
+                    }
+                    if (!empty($validatedData['specialSkills'])) {
+                        $saveExperiences($validatedData['specialSkills'], 'skill');
+                    }
+                    if (!empty($validatedData['workActivities'])) {
+                        $saveExperiences($validatedData['workActivities'], 'work');
+                    }
+                    if (!empty($validatedData['volunteerActivities'])) {
+                        $saveExperiences($validatedData['volunteerActivities'], 'volunteer');
+                    }
+                    if (!empty($validatedData['travels'])) {
+                        $saveExperiences($validatedData['travels'], 'travel');
+                    }
+                    break;
+
+                case 8: // Essay
+                    $validatedData = $request->validate([
+                        'applicant_id' => 'required|exists:personal_infos,applicant_id',
+                        'essay' => 'required|string|min:500'
+                    ]);
+
+                    // Update or create essay
+                    Essay::updateOrCreate(
+                        ['applicant_id' => $request->applicant_id],
+                        ['content' => $validatedData['essay']]
+                    );
+                    break;
             }
 
             DB::commit();
@@ -315,6 +418,19 @@ class ApplicationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Handle validation errors specifically
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return response()->json([
+                    'error' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            // Log the error for debugging
+            \Log::error('Application save failed: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
             return response()->json([
                 'error' => 'Failed to save step',
                 'message' => $e->getMessage()
@@ -325,12 +441,34 @@ class ApplicationController extends Controller
     public function finalizeApplication(Request $request)
     {
         try {
-            $personalInfo = PersonalInfo::where('applicant_id', $request->applicant_id)
-                ->firstOrFail();
+            $personalInfo = PersonalInfo::with([
+                'learningObjective',
+                'education',
+                'workExperience',
+                'creativeWorks',
+                'lifelongLearning',
+                'essay'
+            ])->where('applicant_id', $request->applicant_id)
+              ->firstOrFail();
 
             // Verify all required sections are completed
             if (!$personalInfo->learningObjective) {
                 throw new \Exception('Learning objectives section is incomplete');
+            }
+            if (!$personalInfo->education()->where('type', 'elementary')->exists()) {
+                throw new \Exception('Education section is incomplete - Elementary education required');
+            }
+            if (!$personalInfo->workExperience()->exists()) {
+                throw new \Exception('Work experience section is incomplete');
+            }
+            if (!$personalInfo->creativeWorks()->exists()) {
+                throw new \Exception('Creative works section is incomplete');
+            }
+            if (!$personalInfo->lifelongLearning()->exists()) {
+                throw new \Exception('Lifelong learning section is incomplete');
+            }
+            if (!$personalInfo->essay) {
+                throw new \Exception('Essay section is incomplete');
             }
 
             // Update application status to pending
@@ -372,4 +510,4 @@ class ApplicationController extends Controller
             ], 404);
         }
     }
-} 
+}

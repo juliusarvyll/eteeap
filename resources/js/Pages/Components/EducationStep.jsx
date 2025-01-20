@@ -3,9 +3,9 @@ import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 
-export default function EducationStep({ 
-    formData, 
-    errors, 
+export default function EducationStep({
+    formData,
+    errors,
     handleInputChange,
     handleArrayFieldChange,
     addArrayItem,
@@ -20,196 +20,195 @@ export default function EducationStep({
                 {/* 1. Elementary */}
                 <section className="space-y-4">
                     <h3 className="text-lg font-semibold">1. Elementary</h3>
-                    
+
                     <div className="space-y-4">
                         <p className="text-sm text-gray-600">1.1 What is the name and address of the elementary school you attended?</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel htmlFor="elementarySchool" value="Name of School" />
+                                <InputLabel htmlFor="elementarySchool" value="Name of School" required />
                                 <TextInput
                                     id="elementarySchool"
                                     name="elementarySchool"
                                     value={formData.elementarySchool}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors.elementarySchool ? 'border-red-500' : ''}`}
                                     onChange={handleInputChange}
                                 />
-                                <InputError message={errors.elementarySchool} className="mt-2" />
+                                {errors.elementarySchool && (
+                                    <InputError message={errors.elementarySchool} className="mt-2" />
+                                )}
                             </div>
                             <div>
-                                <InputLabel htmlFor="elementaryAddress" value="Address" />
+                                <InputLabel htmlFor="elementaryAddress" value="Address" required />
                                 <TextInput
                                     id="elementaryAddress"
                                     name="elementaryAddress"
                                     value={formData.elementaryAddress}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors.elementaryAddress ? 'border-red-500' : ''}`}
                                     onChange={handleInputChange}
                                 />
-                                <InputError message={errors.elementaryAddress} className="mt-2" />
+                                {errors.elementaryAddress && (
+                                    <InputError message={errors.elementaryAddress} className="mt-2" />
+                                )}
                             </div>
                         </div>
 
-                        <p className="text-sm text-gray-600">1.2 What are the inclusive dates of attendance in elementary school?</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel htmlFor="elementaryDateFrom" value="From" />
+                                <InputLabel htmlFor="elementaryDateFrom" value="From" required />
                                 <TextInput
+                                    type="date"
                                     id="elementaryDateFrom"
                                     name="elementaryDateFrom"
-                                    type="date"
                                     value={formData.elementaryDateFrom}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors.elementaryDateFrom ? 'border-red-500' : ''}`}
                                     onChange={handleInputChange}
                                 />
-                                <InputError message={errors.elementaryDateFrom} className="mt-2" />
+                                {errors.elementaryDateFrom && (
+                                    <InputError message={errors.elementaryDateFrom} className="mt-2" />
+                                )}
                             </div>
                             <div>
-                                <InputLabel htmlFor="elementaryDateTo" value="To" />
+                                <InputLabel htmlFor="elementaryDateTo" value="To" required />
                                 <TextInput
+                                    type="date"
                                     id="elementaryDateTo"
                                     name="elementaryDateTo"
-                                    type="date"
                                     value={formData.elementaryDateTo}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors.elementaryDateTo ? 'border-red-500' : ''}`}
                                     onChange={handleInputChange}
                                 />
-                                <InputError message={errors.elementaryDateTo} className="mt-2" />
+                                {errors.elementaryDateTo && (
+                                    <InputError message={errors.elementaryDateTo} className="mt-2" />
+                                )}
                             </div>
                         </div>
 
                         <div>
-                            <p className="text-sm text-gray-600">1.3 Do you have your elementary school diploma?</p>
-                            <div className="mt-2">
-                                <label className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        name="hasElementaryDiploma"
-                                        checked={formData.hasElementaryDiploma}
-                                        onChange={handleInputChange}
-                                        className="mr-2"
-                                    />
-                                    Yes
-                                </label>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="hasElementaryDiploma"
+                                    name="hasElementaryDiploma"
+                                    checked={formData.hasElementaryDiploma}
+                                    onChange={(e) => handleInputChange({
+                                        target: {
+                                            name: e.target.name,
+                                            value: e.target.checked
+                                        }
+                                    })}
+                                    className={`${errors.hasElementaryDiploma ? 'border-red-500' : ''}`}
+                                />
+                                <InputLabel htmlFor="hasElementaryDiploma" value="Do you have your elementary school diploma?" required />
                             </div>
-                            {formData.hasElementaryDiploma && (
-                                <div className="mt-4">
-                                    <InputLabel htmlFor="elementaryDiplomaFile" value="Upload Elementary Diploma" />
-                                    <input
-                                        type="file"
-                                        id="elementaryDiplomaFile"
-                                        name="elementaryDiplomaFile"
-                                        onChange={handleInputChange}
-                                        className="mt-1 block w-full text-sm text-gray-500
-                                            file:mr-4 file:py-2 file:px-4
-                                            file:rounded-md file:border-0
-                                            file:text-sm file:font-semibold
-                                            file:bg-blue-50 file:text-blue-700
-                                            hover:file:bg-blue-100"
-                                    />
-                                    <InputError message={errors.elementaryDiplomaFile} className="mt-2" />
-                                </div>
+                            {errors.hasElementaryDiploma && (
+                                <InputError message={errors.hasElementaryDiploma} className="mt-2" />
                             )}
                         </div>
+
+                        {formData.hasElementaryDiploma && (
+                            <div className="mt-4">
+                                <InputLabel htmlFor="elementaryDiplomaFile" value="Upload Elementary Diploma" required />
+                                <input
+                                    type="file"
+                                    id="elementaryDiplomaFile"
+                                    name="elementaryDiplomaFile"
+                                    onChange={handleInputChange}
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    className={`mt-1 block w-full ${errors.elementaryDiplomaFile ? 'border-red-500' : ''}`}
+                                />
+                                <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
+                                {errors.elementaryDiplomaFile && (
+                                    <InputError message={errors.elementaryDiplomaFile} className="mt-2" />
+                                )}
+                            </div>
+                        )}
                     </div>
                 </section>
 
                 {/* 2. High School */}
                 <section className="space-y-4">
                     <h3 className="text-lg font-semibold">2. High School</h3>
-                    
-                    <div>
-                        <p className="text-sm text-gray-600">2.1 Do you have your high school diploma?</p>
-                        <div className="mt-2">
-                            <label className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    name="hasHighSchoolDiploma"
-                                    checked={formData.hasHighSchoolDiploma}
-                                    onChange={handleInputChange}
-                                    className="mr-2"
-                                />
-                                Yes
-                            </label>
-                        </div>
-                        {formData.hasHighSchoolDiploma && (
-                            <div className="mt-4">
-                                <InputLabel htmlFor="highSchoolDiplomaFile" value="Upload High School Diploma" />
-                                <input
-                                    type="file"
-                                    id="highSchoolDiplomaFile"
-                                    name="highSchoolDiplomaFile"
-                                    onChange={handleInputChange}
-                                    className="mt-1 block w-full text-sm text-gray-500
-                                        file:mr-4 file:py-2 file:px-4
-                                        file:rounded-md file:border-0
-                                        file:text-sm file:font-semibold
-                                        file:bg-blue-50 file:text-blue-700
-                                        hover:file:bg-blue-100"
-                                />
-                                <InputError message={errors.highSchoolDiplomaFile} className="mt-2" />
-                            </div>
-                        )}
-                    </div>
-                    
-                    <p className="text-sm text-gray-600">2.2 List all high schools you attended, their addresses, and the type of school:</p>
-                    
+
+                    <p className="text-sm text-gray-600">2.1 Do you have your high school diploma?</p>
+
                     {formData.highSchools.map((school, index) => (
                         <div key={index} className="border p-4 rounded-lg space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-medium">High School {index + 1}</h4>
+                                {index > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeArrayItem('highSchools', index)}
+                                        className="text-red-600 hover:text-red-800"
+                                    >
+                                        Remove
+                                    </button>
+                                )}
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <InputLabel value="Name of School" />
+                                    <InputLabel value="Name of School" required />
                                     <TextInput
+                                        name="name"
                                         value={school.name}
-                                        className="mt-1 block w-full"
                                         onChange={(e) => handleArrayFieldChange('highSchools', index, 'name', e.target.value)}
+                                        className={`mt-1 block w-full ${errors[`highSchools.${index}.name`] ? 'border-red-500' : ''}`}
                                     />
+                                    {errors[`highSchools.${index}.name`] && (
+                                        <InputError message={errors[`highSchools.${index}.name`]} className="mt-2" />
+                                    )}
                                 </div>
                                 <div>
-                                    <InputLabel value="Address" />
+                                    <InputLabel value="Address" required />
                                     <TextInput
+                                        name="address"
                                         value={school.address}
-                                        className="mt-1 block w-full"
                                         onChange={(e) => handleArrayFieldChange('highSchools', index, 'address', e.target.value)}
+                                        className={`mt-1 block w-full ${errors[`highSchools.${index}.address`] ? 'border-red-500' : ''}`}
                                     />
+                                    {errors[`highSchools.${index}.address`] && (
+                                        <InputError message={errors[`highSchools.${index}.address`]} className="mt-2" />
+                                    )}
                                 </div>
                                 <div>
-                                    <InputLabel value="Type of School" />
+                                    <InputLabel value="Type of School" required />
                                     <TextInput
+                                        name="type"
                                         value={school.type}
+                                        onChange={(e) => handleArrayFieldChange('highSchools', index, 'type', e.target.value)}
                                         className="mt-1 block w-full"
                                         placeholder="e.g., Middle School, Junior High, Senior High"
-                                        onChange={(e) => handleArrayFieldChange('highSchools', index, 'type', e.target.value)}
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <InputLabel value="From" />
-                                        <TextInput
-                                            type="date"
-                                            value={school.dateFrom}
-                                            className="mt-1 block w-full"
-                                            onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateFrom', e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <InputLabel value="To" />
-                                        <TextInput
-                                            type="date"
-                                            value={school.dateTo}
-                                            className="mt-1 block w-full"
-                                            onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateTo', e.target.value)}
-                                        />
-                                    </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <InputLabel value="From" required />
+                                    <TextInput
+                                        type="date"
+                                        name="dateFrom"
+                                        value={school.dateFrom}
+                                        onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateFrom', e.target.value)}
+                                        className={`mt-1 block w-full ${errors[`highSchools.${index}.dateFrom`] ? 'border-red-500' : ''}`}
+                                    />
+                                    {errors[`highSchools.${index}.dateFrom`] && (
+                                        <InputError message={errors[`highSchools.${index}.dateFrom`]} className="mt-2" />
+                                    )}
+                                </div>
+                                <div>
+                                    <InputLabel value="To" required />
+                                    <TextInput
+                                        type="date"
+                                        name="dateTo"
+                                        value={school.dateTo}
+                                        onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateTo', e.target.value)}
+                                        className={`mt-1 block w-full ${errors[`highSchools.${index}.dateTo`] ? 'border-red-500' : ''}`}
+                                    />
+                                    {errors[`highSchools.${index}.dateTo`] && (
+                                        <InputError message={errors[`highSchools.${index}.dateTo`]} className="mt-2" />
+                                    )}
                                 </div>
                             </div>
-                            {formData.highSchools.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeArrayItem('highSchools', index)}
-                                    className="text-red-600 hover:text-red-800"
-                                >
-                                    Remove School
-                                </button>
-                            )}
                         </div>
                     ))}
                     <PrimaryButton
@@ -229,7 +228,7 @@ export default function EducationStep({
                 {/* 3. PEPT */}
                 <section className="space-y-4">
                     <h3 className="text-lg font-semibold">3. Philippine Educational Placement Test (PEPT) Equivalency</h3>
-                    
+
                     <div>
                         <p className="text-sm text-gray-600">3.1 Did you obtain a high school diploma through PEPT?</p>
                         <label className="flex items-center mt-2">
@@ -283,7 +282,7 @@ export default function EducationStep({
                 {/* 4. Post-Secondary */}
                 <section className="space-y-4">
                     <h3 className="text-lg font-semibold">4. Post-Secondary Formal Education</h3>
-                    
+
                     <div>
                         <p className="text-sm text-gray-600">4.1 Do you have any post-secondary diplomas or degrees?</p>
                         <div className="mt-2">
@@ -378,7 +377,7 @@ export default function EducationStep({
             <div className="space-y-6">
                 <h2 className="text-xl font-bold">B. Non-Formal Education</h2>
                 <p className="text-sm text-gray-600">
-                    Non-formal education refers to short-term, structured training programs for specific purposes 
+                    Non-formal education refers to short-term, structured training programs for specific purposes
                     such as skills development or values orientation.
                 </p>
 
@@ -522,4 +521,4 @@ export default function EducationStep({
             </div>
         </div>
     );
-} 
+}
