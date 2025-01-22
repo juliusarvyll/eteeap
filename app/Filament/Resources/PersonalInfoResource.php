@@ -47,7 +47,8 @@ class PersonalInfoResource extends Resource
                     ->label('Suffix'),
                 Forms\Components\DatePicker::make('birthDate')
                     ->required()
-                    ->label('Birth Date'),
+                    ->label('Birth Date')
+                    ->format('Y-m-d'),
                 Forms\Components\TextInput::make('placeOfBirth')
                     ->label('Place of Birth'),
                 Forms\Components\Select::make('civilStatus')
@@ -89,7 +90,7 @@ class PersonalInfoResource extends Resource
                             ->label('Suffix'),
                         TextEntry::make('birthDate')
                             ->label('Birth Date')
-                            ->date(),
+                            ->date('Y-m-d'),
                         TextEntry::make('placeOfBirth')
                             ->label('Place of Birth'),
                         TextEntry::make('civilStatus')

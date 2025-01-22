@@ -18,7 +18,8 @@ class WorkExperience extends Model
         'supervisorName',
         'reasonForLeaving',
         'responsibilities',
-        'references'
+        'references',
+        'documents'
     ];
 
     protected $casts = [

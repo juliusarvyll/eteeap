@@ -10,12 +10,14 @@ class AcademicAward extends Model
     protected $fillable = [
         'applicant_id',
         'title',
-        'organization',
-        'dateAwarded'
+        'institution',
+        'dateReceived',
+        'description',
+        'document'
     ];
 
     protected $casts = [
-        'dateAwarded' => 'date'
+        'dateReceived' => 'date'
     ];
 
     public function personalInfo(): BelongsTo

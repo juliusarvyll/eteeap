@@ -3,13 +3,17 @@ import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 
 export default function PersonalInfoStep({ formData, errors, handleInputChange }) {
+    // Add console.log to debug the form data being sent
+    console.log('Form Data:', formData);
+
     // Helper function to handle file changes
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         handleInputChange({
             target: {
                 name: e.target.name,
-                value: file
+                value: file,
+                type: 'file'
             }
         });
     };
@@ -173,17 +177,17 @@ export default function PersonalInfoStep({ formData, errors, handleInputChange }
                     )}
                 </div>
                 <div>
-                    <InputLabel htmlFor="birthPlace" value="Place of Birth" required />
+                    <InputLabel htmlFor="placeOfBirth" value="Place of Birth" required />
                     <TextInput
-                        id="birthPlace"
-                        name="birthPlace"
-                        value={formData.birthPlace}
-                        className={`mt-1 block w-full ${errors.birthPlace ? 'error-field border-red-500' : ''}`}
+                        id="placeOfBirth"
+                        name="placeOfBirth"
+                        value={formData.placeOfBirth}
+                        className={`mt-1 block w-full ${errors.placeOfBirth ? 'error-field border-red-500' : ''}`}
                         placeholder="City/Municipality and Province"
                         onChange={handleInputChange}
                     />
-                    {errors.birthPlace && (
-                        <InputError message={errors.birthPlace} className="mt-2" />
+                    {errors.placeOfBirth && (
+                        <InputError message={errors.placeOfBirth} className="mt-2" />
                     )}
                 </div>
             </div>

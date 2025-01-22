@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('reasonForLeaving');
             $table->text('responsibilities');
             $table->json('references'); // Stores array of 3 reference persons
+            $table->string('documents')->nullable();
             $table->timestamps();
         });
     }

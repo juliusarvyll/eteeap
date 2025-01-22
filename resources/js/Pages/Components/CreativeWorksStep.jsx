@@ -11,6 +11,15 @@ export default function CreativeWorksStep({
     addArrayItem,
     removeArrayItem 
 }) {
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const submissionData = {
+            applicant_id: formData.applicant_id,
+            creativeWorks: formData.creativeWorks
+        };
+        // ... rest of your submit logic
+    };
+
     return (
         <div className="space-y-8">
             <div>

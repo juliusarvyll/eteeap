@@ -7,11 +7,40 @@ import PrimaryButton from '@/Components/PrimaryButton';
 export default function WorkExperienceStep({
     formData,
     errors,
-    handleInputChange,
     handleArrayFieldChange,
     addArrayItem,
     removeArrayItem
 }) {
+    // Initialize workExperiences if it's empty
+    if (!formData.workExperiences || formData.workExperiences.length === 0) {
+        addArrayItem('workExperiences', {
+            designation: '',
+            companyName: '',
+            companyAddress: '',
+            dateFrom: '',
+            dateTo: '',
+            employmentStatus: '',
+            supervisorName: '',
+            reasonForLeaving: '',
+            responsibilities: '',
+            references: ['', '', ''],
+            documents: null
+        });
+    }
+
+    const handleFileChange = (index, e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // You can add file size validation here if needed
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                alert('File size should not exceed 2MB');
+                e.target.value = '';
+                return;
+            }
+            handleArrayFieldChange('workExperiences', index, 'documents', file);
+        }
+    };
+
     return (
         <div className="space-y-8">
             <div>
@@ -40,30 +69,37 @@ export default function WorkExperienceStep({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <InputLabel value="Position/Title" required />
+                            <InputLabel value="Designation/Position" required />
                             <TextInput
-                                name="position"
-                                value={experience.position}
-                                onChange={(e) => handleArrayFieldChange('workExperiences', index, 'position', e.target.value)}
-                                className={`mt-1 block w-full ${errors[`workExperiences.${index}.position`] ? 'border-red-500' : ''}`}
+                                name="designation"
+                                value={experience.designation}
+                                onChange={(e) => handleArrayFieldChange('workExperiences', index, 'designation', e.target.value)}
+                                className={`mt-1 block w-full ${errors[`workExperiences.${index}.designation`] ? 'border-red-500' : ''}`}
                             />
-                            {errors[`workExperiences.${index}.position`] && (
-                                <InputError message={errors[`workExperiences.${index}.position`]} className="mt-2" />
-                            )}
+                            <InputError message={errors[`workExperiences.${index}.designation`]} />
                         </div>
 
                         <div>
-                            <InputLabel value="Company/Organization" required />
+                            <InputLabel value="Company Name" required />
                             <TextInput
-                                name="company"
-                                value={experience.company}
-                                onChange={(e) => handleArrayFieldChange('workExperiences', index, 'company', e.target.value)}
-                                className={`mt-1 block w-full ${errors[`workExperiences.${index}.company`] ? 'border-red-500' : ''}`}
+                                name="companyName"
+                                value={experience.companyName}
+                                onChange={(e) => handleArrayFieldChange('workExperiences', index, 'companyName', e.target.value)}
+                                className={`mt-1 block w-full ${errors[`workExperiences.${index}.companyName`] ? 'border-red-500' : ''}`}
                             />
-                            {errors[`workExperiences.${index}.company`] && (
-                                <InputError message={errors[`workExperiences.${index}.company`]} className="mt-2" />
-                            )}
+                            <InputError message={errors[`workExperiences.${index}.companyName`]} />
                         </div>
+                    </div>
+
+                    <div>
+                        <InputLabel value="Company Address" required />
+                        <TextInput
+                            name="companyAddress"
+                            value={experience.companyAddress}
+                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'companyAddress', e.target.value)}
+                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.companyAddress`] ? 'border-red-500' : ''}`}
+                        />
+                        <InputError message={errors[`workExperiences.${index}.companyAddress`]} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -76,9 +112,7 @@ export default function WorkExperienceStep({
                                 onChange={(e) => handleArrayFieldChange('workExperiences', index, 'dateFrom', e.target.value)}
                                 className={`mt-1 block w-full ${errors[`workExperiences.${index}.dateFrom`] ? 'border-red-500' : ''}`}
                             />
-                            {errors[`workExperiences.${index}.dateFrom`] && (
-                                <InputError message={errors[`workExperiences.${index}.dateFrom`]} className="mt-2" />
-                            )}
+                            <InputError message={errors[`workExperiences.${index}.dateFrom`]} />
                         </div>
 
                         <div>
@@ -90,38 +124,103 @@ export default function WorkExperienceStep({
                                 onChange={(e) => handleArrayFieldChange('workExperiences', index, 'dateTo', e.target.value)}
                                 className={`mt-1 block w-full ${errors[`workExperiences.${index}.dateTo`] ? 'border-red-500' : ''}`}
                             />
-                            {errors[`workExperiences.${index}.dateTo`] && (
-                                <InputError message={errors[`workExperiences.${index}.dateTo`]} className="mt-2" />
-                            )}
+                            <InputError message={errors[`workExperiences.${index}.dateTo`]} />
                         </div>
                     </div>
 
                     <div>
-                        <InputLabel value="Job Description" required />
-                        <TextArea
-                            name="description"
-                            value={experience.description}
-                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'description', e.target.value)}
-                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.description`] ? 'border-red-500' : ''}`}
-                            rows={4}
+                        <InputLabel value="Employment Status" required />
+                        <TextInput
+                            name="employmentStatus"
+                            value={experience.employmentStatus}
+                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'employmentStatus', e.target.value)}
+                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.employmentStatus`] ? 'border-red-500' : ''}`}
                         />
-                        {errors[`workExperiences.${index}.description`] && (
-                            <InputError message={errors[`workExperiences.${index}.description`]} className="mt-2" />
-                        )}
+                        <InputError message={errors[`workExperiences.${index}.employmentStatus`]} />
                     </div>
 
                     <div>
+                        <InputLabel value="Supervisor Name" required />
+                        <TextInput
+                            name="supervisorName"
+                            value={experience.supervisorName}
+                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'supervisorName', e.target.value)}
+                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.supervisorName`] ? 'border-red-500' : ''}`}
+                        />
+                        <InputError message={errors[`workExperiences.${index}.supervisorName`]} />
+                    </div>
+
+                    <div>
+                        <InputLabel value="Reason for Leaving" required />
+                        <TextArea
+                            name="reasonForLeaving"
+                            value={experience.reasonForLeaving}
+                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'reasonForLeaving', e.target.value)}
+                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.reasonForLeaving`] ? 'border-red-500' : ''}`}
+                        />
+                        <InputError message={errors[`workExperiences.${index}.reasonForLeaving`]} />
+                    </div>
+
+                    <div>
+                        <InputLabel value="Responsibilities" required />
+                        <TextArea
+                            name="responsibilities"
+                            value={experience.responsibilities}
+                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'responsibilities', e.target.value)}
+                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.responsibilities`] ? 'border-red-500' : ''}`}
+                        />
+                        <InputError message={errors[`workExperiences.${index}.responsibilities`]} />
+                    </div>
+
+                    <div>
+                        <InputLabel value="References (3 persons)" required />
+                        {[0, 1, 2].map((refIndex) => (
+                            <TextInput
+                                key={refIndex}
+                                name={`references.${refIndex}`}
+                                value={experience.references[refIndex] || ''}
+                                onChange={(e) => {
+                                    const newRefs = [...experience.references];
+                                    newRefs[refIndex] = e.target.value;
+                                    handleArrayFieldChange('workExperiences', index, 'references', newRefs);
+                                }}
+                                className="mt-1 block w-full"
+                                placeholder={`Reference Person ${refIndex + 1}`}
+                            />
+                        ))}
+                        <InputError message={errors[`workExperiences.${index}.references`]} />
+                    </div>
+
+                    <div className="space-y-2">
                         <InputLabel value="Supporting Documents" />
                         <input
                             type="file"
-                            name="documents"
-                            onChange={(e) => handleArrayFieldChange('workExperiences', index, 'documents', e.target.files[0])}
+                            name={`workExperiences[${index}].documents`}
+                            onChange={(e) => handleFileChange(index, e)}
                             accept=".pdf,.jpg,.jpeg,.png"
-                            className={`mt-1 block w-full ${errors[`workExperiences.${index}.documents`] ? 'border-red-500' : ''}`}
+                            className={`block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-indigo-50 file:text-indigo-700
+                                hover:file:bg-indigo-100
+                                ${errors[`workExperiences.${index}.documents`] ? 'border-red-500' : ''}`}
                         />
-                        <p className="text-sm text-gray-500 mt-1">Upload certificates, recommendation letters, etc. (PDF, JPG, PNG max 2MB)</p>
+                        <p className="text-xs text-gray-500">
+                            Upload certificates, recommendation letters, etc. (PDF, JPG, PNG format, max 2MB)
+                        </p>
                         {errors[`workExperiences.${index}.documents`] && (
-                            <InputError message={errors[`workExperiences.${index}.documents`]} className="mt-2" />
+                            <InputError 
+                                message={errors[`workExperiences.${index}.documents`]} 
+                                className="mt-1" 
+                            />
+                        )}
+                        {experience.documents && typeof experience.documents === 'string' && (
+                            <div className="mt-2">
+                                <span className="text-sm text-gray-600">
+                                    Current file: {experience.documents.split('/').pop()}
+                                </span>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -130,11 +229,16 @@ export default function WorkExperienceStep({
             <PrimaryButton
                 type="button"
                 onClick={() => addArrayItem('workExperiences', {
-                    position: '',
-                    company: '',
+                    designation: '',
+                    companyName: '',
+                    companyAddress: '',
                     dateFrom: '',
                     dateTo: '',
-                    description: '',
+                    employmentStatus: '',
+                    supervisorName: '',
+                    reasonForLeaving: '',
+                    responsibilities: '',
+                    references: ['', '', ''],
                     documents: null
                 })}
             >

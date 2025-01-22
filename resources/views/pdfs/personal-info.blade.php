@@ -70,6 +70,12 @@
             <span class="label">Application Status:</span>
             {{ ucfirst($record->status) }}
         </div>
+        @if($record->document)
+        <div class="field">
+            <span class="label">Supporting Document:</span>
+            {{ Storage::url($record->document) }}
+        </div>
+        @endif
     </div>
 
     @if($record->learningObjective)
@@ -131,6 +137,12 @@
                 <span class="label">Has Diploma:</span>
                 {{ isset($record->elementaryEducation['has_diploma']) && $record->elementaryEducation['has_diploma'] ? 'Yes' : 'No' }}
             </div>
+            @if($record->elementaryEducation['diploma_file'])
+            <div class="field">
+                <span class="label">Elementary Diploma:</span>
+                {{ Storage::url($record->elementaryEducation['diploma_file']) }}
+            </div>
+            @endif
         </div>
         @endif
 
@@ -154,6 +166,12 @@
                 <span class="label">Period:</span>
                 {{ $highSchool['date_from'] ?? '' }} - {{ $highSchool['date_to'] ?? '' }}
             </div>
+            @if($highSchool['diploma_file'])
+            <div class="field">
+                <span class="label">High School Diploma:</span>
+                {{ Storage::url($highSchool['diploma_file']) }}
+            </div>
+            @endif
             @endforeach
         </div>
         @endif
@@ -174,6 +192,12 @@
                 <span class="label">School Year:</span>
                 {{ $postSecondary['school_year'] ?? '' }}
             </div>
+            @if($postSecondary['diploma_file'])
+            <div class="field">
+                <span class="label">Post Secondary Diploma:</span>
+                {{ Storage::url($postSecondary['diploma_file']) }}
+            </div>
+            @endif
             @endforeach
         </div>
         @endif

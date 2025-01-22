@@ -11,7 +11,9 @@ class WorkAward extends Model
         'applicant_id',
         'title',
         'organization',
-        'dateAwarded'
+        'dateAwarded',
+        'description',
+        'document'
     ];
 
     protected $casts = [

@@ -53,7 +53,7 @@ class ApplicationController extends Controller
                         'zipCode' => 'required|string|max:20',
                         'contactNumber' => 'required|string|max:50',
                         'birthDate' => 'required|date',
-                        'birthPlace' => 'required|string|max:255',
+                        'placeOfBirth' => 'required|string|max:255',
                         'civilStatus' => 'required|string|in:Single,Married,Separated,Widow,Divorced',
                         'document' => $request->hasFile('document') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
                         'sex' => 'required|string|in:Male,Female',
@@ -97,60 +97,81 @@ class ApplicationController extends Controller
                 case 3: // Education
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
+                        
                         // Elementary
                         'elementarySchool' => 'required|string',
                         'elementaryAddress' => 'required|string',
                         'elementaryDateFrom' => 'required|date',
                         'elementaryDateTo' => 'required|date|after:elementaryDateFrom',
-                        'hasElementaryDiploma' => 'required|boolean',
-                        'elementaryDiplomaFile' => $request->hasFile('elementaryDiplomaFile') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
+                        'hasElementaryDiploma' => 'boolean',
+                        'elementaryDiplomaFile' => $request->hasFile('elementaryDiplomaFile') ? 'file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
 
-                        // High School
-                        'hasHighSchoolDiploma' => 'required|boolean',
-                        'highSchoolDiplomaFile' => $request->hasFile('highSchoolDiplomaFile') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
-                        'highSchools' => 'required|array|min:1',
-                        'highSchools.*.name' => 'required|string',
-                        'highSchools.*.address' => 'required|string',
-                        'highSchools.*.type' => 'required|string',
-                        'highSchools.*.dateFrom' => 'required|date',
-                        'highSchools.*.dateTo' => 'required|date|after:highSchools.*.dateFrom',
+                        // Secondary Education
+                        'hasPEPT' => 'boolean',
+                        
+                        // PEPT fields only required when hasPEPT is true
+                        'peptYear' => 'required_if:hasPEPT,1|nullable|integer',
+                        'peptGrade' => 'required_if:hasPEPT,1|nullable|string',
 
-                        // PEPT
-                        'hasPEPT' => 'required|boolean',
-                        'peptYear' => 'required_if:hasPEPT,true|nullable|integer',
-                        'peptGrade' => 'required_if:hasPEPT,true|nullable|string',
+                        // High School fields only required when hasPEPT is false
+                        'highSchools' => 'required_if:hasPEPT,0|array',
+                        'highSchools.*.name' => 'required_if:hasPEPT,0|string',
+                        'highSchools.*.address' => 'required_if:hasPEPT,0|string',
+                        'highSchools.*.type' => 'required_if:hasPEPT,0|string',
+                        'highSchools.*.dateFrom' => 'required_if:hasPEPT,0|date',
+                        'highSchools.*.dateTo' => 'required_if:hasPEPT,0|date|after:highSchools.*.dateFrom',
 
                         // Post Secondary
-                        'hasPostSecondaryDiploma' => 'required|boolean',
-                        'postSecondaryDiplomaFile' => $request->hasFile('postSecondaryDiplomaFile') ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
-                        'postSecondary' => 'array',
-                        'postSecondary.*.program' => 'required|string',
-                        'postSecondary.*.institution' => 'required|string',
-                        'postSecondary.*.schoolYear' => 'required|string',
+                        'hasPostSecondaryDiploma' => 'boolean',
+                        'postSecondaryDiplomaFile' => $request->hasFile('postSecondaryDiplomaFile') ? 'file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
+                        'postSecondary' => 'present|array',
+                        'postSecondary.*.program' => 'required_with:postSecondary|string',
+                        'postSecondary.*.institution' => 'required_with:postSecondary|string',
+                        'postSecondary.*.schoolYear' => 'required_with:postSecondary|string',
 
                         // Non-Formal Education
-                        'nonFormalEducation' => 'array',
-                        'nonFormalEducation.*.title' => 'required|string',
-                        'nonFormalEducation.*.organization' => 'required|string',
-                        'nonFormalEducation.*.date' => 'required|date',
-                        'nonFormalEducation.*.certificate' => 'required|string',
-                        'nonFormalEducation.*.participation' => 'required|string',
+                        'nonFormalEducation' => 'present|array',
+                        'nonFormalEducation.*.title' => 'required_with:nonFormalEducation|string',
+                        'nonFormalEducation.*.organization' => 'required_with:nonFormalEducation|string',
+                        'nonFormalEducation.*.date' => 'required_with:nonFormalEducation|date',
+                        'nonFormalEducation.*.certificate' => 'required_with:nonFormalEducation|string',
+                        'nonFormalEducation.*.participation' => 'required_with:nonFormalEducation|string',
 
                         // Certifications
-                        'certifications' => 'array',
-                        'certifications.*.title' => 'required|string',
-                        'certifications.*.agency' => 'required|string',
-                        'certifications.*.dateCertified' => 'required|date',
-                        'certifications.*.rating' => 'required|string',
+                        'certifications' => 'present|array',
+                        'certifications.*.title' => 'required_with:certifications|string',
+                        'certifications.*.agency' => 'required_with:certifications|string',
+                        'certifications.*.dateCertified' => 'required_with:certifications|date',
+                        'certifications.*.rating' => 'required_with:certifications|string',
                     ]);
 
-                    // Handle file uploads
+                    // Convert string boolean values to actual booleans
+                    $validatedData['hasElementaryDiploma'] = filter_var($request->input('hasElementaryDiploma'), FILTER_VALIDATE_BOOLEAN);
+                    $validatedData['hasPEPT'] = filter_var($request->input('hasPEPT'), FILTER_VALIDATE_BOOLEAN);
+                    $validatedData['hasPostSecondaryDiploma'] = filter_var($request->input('hasPostSecondaryDiploma'), FILTER_VALIDATE_BOOLEAN);
+
+                    // Handle file uploads with proper error handling
                     $files = [];
-                    foreach (['elementaryDiplomaFile', 'highSchoolDiplomaFile', 'postSecondaryDiplomaFile'] as $fileField) {
+                    $fileFields = [
+                        'elementaryDiplomaFile',
+                        'postSecondaryDiplomaFile'
+                    ];
+
+                    foreach ($fileFields as $fileField) {
                         if ($request->hasFile($fileField)) {
-                            $files[$fileField] = $request->file($fileField)->store('diplomas', 'public');
+                            try {
+                                $file = $request->file($fileField);
+                                $path = $file->store('diplomas', 'public');
+                                $files[$fileField] = $path;
+                            } catch (\Exception $e) {
+                                \Log::error("Failed to upload {$fileField}: " . $e->getMessage());
+                                throw new \Exception("Failed to upload {$fileField}");
+                            }
                         }
                     }
+
+                    // Delete existing education records for this applicant
+                    Education::where('applicant_id', $request->applicant_id)->delete();
 
                     // Save Elementary
                     Education::create([
@@ -174,8 +195,8 @@ class ApplicationController extends Controller
                             'school_type' => $school['type'],
                             'date_from' => $school['dateFrom'],
                             'date_to' => $school['dateTo'],
-                            'has_diploma' => $validatedData['hasHighSchoolDiploma'],
-                            'diploma_file' => $files['highSchoolDiplomaFile'] ?? null,
+                            'has_diploma' => true,
+                            'diploma_file' => null,
                         ]);
                     }
 
@@ -240,13 +261,26 @@ class ApplicationController extends Controller
                         'workExperiences.*.responsibilities' => 'required|string',
                         'workExperiences.*.references' => 'required|array|size:3',
                         'workExperiences.*.references.*' => 'required|string|max:255',
+                        'workExperiences.*.documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
                     ]);
 
                     // Delete existing records first
                     WorkExperience::where('applicant_id', $request->applicant_id)->delete();
 
                     // Create new records
-                    foreach ($validatedData['workExperiences'] as $experience) {
+                    foreach ($request->workExperiences as $index => $experience) {
+                        // Handle document upload if present
+                        $documentPath = null;
+                        if (isset($experience['documents']) && $request->hasFile("workExperiences.{$index}.documents")) {
+                            try {
+                                $documentPath = $request->file("workExperiences.{$index}.documents")
+                                    ->store('work-experiences', 'public');
+                            } catch (\Exception $e) {
+                                \Log::error("Failed to upload work experience document: " . $e->getMessage());
+                                throw new \Exception("Failed to upload document for work experience " . ($index + 1));
+                            }
+                        }
+
                         WorkExperience::create([
                             'applicant_id' => $request->applicant_id,
                             'designation' => $experience['designation'],
@@ -258,54 +292,104 @@ class ApplicationController extends Controller
                             'supervisorName' => $experience['supervisorName'],
                             'reasonForLeaving' => $experience['reasonForLeaving'],
                             'responsibilities' => $experience['responsibilities'],
-                            'references' => $experience['references']
+                            'references' => $experience['references'],
+                            'documents' => $documentPath
                         ]);
                     }
                     break;
 
                 case 5: // Honors and Awards
-                    $request->validate([
+                    $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
+                        
+                        // Academic Awards
                         'academicAwards' => 'present|array',
                         'academicAwards.*.title' => 'required|string',
-                        'academicAwards.*.organization' => 'required|string',
-                        'academicAwards.*.dateAwarded' => 'required|date',
+                        'academicAwards.*.institution' => 'required|string',
+                        'academicAwards.*.dateReceived' => 'required|date',
+                        'academicAwards.*.description' => 'required|string',
+                        'academicAwards.*.document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                        
+                        // Community Awards
                         'communityAwards' => 'present|array',
                         'communityAwards.*.title' => 'required|string',
                         'communityAwards.*.organization' => 'required|string',
                         'communityAwards.*.dateAwarded' => 'required|date',
+                        
+                        // Work Awards
                         'workAwards' => 'present|array',
                         'workAwards.*.title' => 'required|string',
                         'workAwards.*.organization' => 'required|string',
                         'workAwards.*.dateAwarded' => 'required|date'
                     ]);
 
+                    // Handle Academic Awards
                     if ($request->has('academicAwards')) {
                         AcademicAward::where('applicant_id', $request->applicant_id)->delete();
+                        
                         foreach ($request->academicAwards as $award) {
-                            AcademicAward::create([
-                                'applicant_id' => $request->applicant_id,
-                                ...$award
+                            // Debug log
+                            \Log::info('Creating academic award with data:', [
+                                'award_data' => $award,
+                                'applicant_id' => $request->applicant_id
                             ]);
+
+                            try {
+                                // Create award with explicit data array
+                                $awardData = [
+                                    'applicant_id' => $request->applicant_id,
+                                    'title' => $award['title'],
+                                    'institution' => $award['institution'],
+                                    'dateReceived' => $award['dateReceived'],
+                                    'description' => $award['description'],
+                                ];
+
+                                // Handle document if present
+                                if (isset($award['document']) && $award['document'] instanceof \Illuminate\Http\UploadedFile) {
+                                    $awardData['document'] = $award['document']->store('awards', 'public');
+                                }
+
+                                // Debug log the final data being sent to create
+                                \Log::info('Final award data for creation:', $awardData);
+
+                                $createdAward = AcademicAward::create($awardData);
+                                
+                                // Debug log success
+                                \Log::info('Successfully created award:', ['award_id' => $createdAward->id]);
+
+                            } catch (\Exception $e) {
+                                // Debug log error
+                                \Log::error('Failed to create academic award:', [
+                                    'error' => $e->getMessage(),
+                                    'data' => $awardData ?? null
+                                ]);
+                                throw $e;
+                            }
                         }
                     }
 
+                    // Handle Community Awards
                     if ($request->has('communityAwards')) {
                         CommunityAward::where('applicant_id', $request->applicant_id)->delete();
                         foreach ($request->communityAwards as $award) {
                             CommunityAward::create([
                                 'applicant_id' => $request->applicant_id,
-                                ...$award
+                                'title' => $award['title'],
+                                'organization' => $award['organization'],
+                                'dateAwarded' => $award['dateAwarded']
                             ]);
                         }
                     }
 
+                    // Handle Work Awards
                     if ($request->has('workAwards')) {
                         WorkAward::where('applicant_id', $request->applicant_id)->delete();
                         foreach ($request->workAwards as $award) {
                             WorkAward::create([
                                 'applicant_id' => $request->applicant_id,
-                                ...$award
+                                'title' => $award['title'],
+                                'organization' => $award['organization'],
+                                'dateAwarded' => $award['dateAwarded']
                             ]);
                         }
                     }
@@ -322,19 +406,34 @@ class ApplicationController extends Controller
                         'creativeWorks.*.corroboratingBody' => 'required|string|max:255',
                     ]);
 
-                    // Delete existing records first
-                    CreativeWork::where('applicant_id', $request->applicant_id)->delete();
+                    try {
+                        // Delete existing records first
+                        CreativeWork::where('applicant_id', $request->applicant_id)->delete();
 
-                    // Create new records
-                    foreach ($validatedData['creativeWorks'] as $work) {
-                        CreativeWork::create([
+                        // Create new records
+                        foreach ($request->creativeWorks as $work) {
+                            CreativeWork::create([
+                                'applicant_id' => $request->applicant_id,  // Make sure this is passed from the frontend
+                                'title' => $work['title'],
+                                'description' => $work['description'],
+                                'significance' => $work['significance'],
+                                'date_completed' => $work['dateCompleted'],
+                                'corroborating_body' => $work['corroboratingBody']
+                            ]);
+                        }
+
+                        // Debug logging
+                        \Log::info('Creative works saved successfully', [
                             'applicant_id' => $request->applicant_id,
-                            'title' => $work['title'],
-                            'description' => $work['description'],
-                            'significance' => $work['significance'],
-                            'date_completed' => $work['dateCompleted'],
-                            'corroborating_body' => $work['corroboratingBody']
+                            'count' => count($request->creativeWorks)
                         ]);
+
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to save creative works', [
+                            'error' => $e->getMessage(),
+                            'applicant_id' => $request->applicant_id ?? null
+                        ]);
+                        throw $e;
                     }
                     break;
 

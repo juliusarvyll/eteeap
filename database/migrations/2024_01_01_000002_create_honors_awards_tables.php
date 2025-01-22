@@ -12,8 +12,10 @@ return new class extends Migration
             $table->id();
             $table->string('applicant_id');
             $table->string('title');
-            $table->string('organization');
-            $table->date('dateAwarded');
+            $table->string('institution');
+            $table->date('dateReceived');
+            $table->text('description');
+            $table->string('document')->nullable();
             $table->timestamps();
             
             $table->foreign('applicant_id')
