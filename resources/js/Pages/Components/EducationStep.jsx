@@ -282,6 +282,56 @@ export default function EducationStep({
                                                 )}
                                             </div>
                                         </div>
+                                        <div>
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="hasHighSchoolDiploma"
+                                                    name="hasHighSchoolDiploma"
+                                                    checked={Boolean(formData.hasHighSchoolDiploma)}
+                                                    onChange={(e) => {
+                                                        handleInputChange({
+                                                            target: {
+                                                                name: 'hasHighSchoolDiploma',
+                                                                value: e.target.checked ? '1' : '0',
+                                                                type: 'checkbox',
+                                                                checked: e.target.checked
+                                                            }
+                                                        });
+                                                    }}
+                                                    className={`${errors.hasHighSchoolDiploma ? 'border-red-500' : ''}`}
+                                                />
+                                                <InputLabel htmlFor="hasHighSchoolDiploma" value="Do you have your high school diploma?" required />
+                                            </div>
+                                            {errors.hasHighSchoolDiploma && (
+                                                <InputError message={errors.hasHighSchoolDiploma} className="mt-2" />
+                                            )}
+                                        </div>
+
+                                        {formData.hasHighSchoolDiploma && (
+                                            <div className="mt-4">
+                                                <InputLabel htmlFor="highSchoolDiplomaFile" value="Upload High School Diploma" required />
+                                                <input
+                                                    type="file"
+                                                    id="highSchoolDiplomaFile"
+                                                    name="highSchoolDiplomaFile"
+                                                    onChange={(e) => {
+                                                        handleInputChange({
+                                                            target: {
+                                                                name: 'highSchoolDiplomaFile',
+                                                                value: e.target.files[0]
+                                                            }
+                                                        });
+                                                    }}
+                                                    accept=".pdf,.jpg,.jpeg,.png"
+                                                    className={`mt-1 block w-full ${errors.highSchoolDiplomaFile ? 'border-red-500' : ''}`}
+                                                />
+                                                <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
+                                                {errors.highSchoolDiplomaFile && (
+                                                    <InputError message={errors.highSchoolDiplomaFile} className="mt-2" />
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 <PrimaryButton
@@ -335,6 +385,29 @@ export default function EducationStep({
                                             <InputError message={errors.peptGrade} className="mt-2" />
                                         )}
                                     </div>
+                                </div>
+
+                                <div>
+                                    <InputLabel htmlFor="peptCertificateFile" value="Upload PEPT Certificate" required />
+                                    <input
+                                        type="file"
+                                        id="peptCertificateFile"
+                                        name="peptCertificateFile"
+                                        onChange={(e) => {
+                                            handleInputChange({
+                                                target: {
+                                                    name: 'peptCertificateFile',
+                                                    value: e.target.files[0]
+                                                }
+                                            });
+                                        }}
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        className={`mt-1 block w-full ${errors.peptCertificateFile ? 'border-red-500' : ''}`}
+                                    />
+                                    <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
+                                    {errors.peptCertificateFile && (
+                                        <InputError message={errors.peptCertificateFile} className="mt-2" />
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -574,6 +647,27 @@ export default function EducationStep({
                                     onChange={(e) => handleArrayFieldChange('certifications', index, 'rating', e.target.value)}
                                 />
                             </div>
+                        </div>
+                        <div>
+                            <InputLabel value="Upload Certificate" />
+                            <input
+                                type="file"
+                                name={`certificationFile-${index}`}
+                                onChange={(e) => {
+                                    handleArrayFieldChange('certifications', index, 'file', e.target.files[0]);
+                                }}
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                className="mt-1 block w-full text-sm text-gray-500
+                                    file:mr-4 file:py-2 file:px-4
+                                    file:rounded-md file:border-0
+                                    file:text-sm file:font-semibold
+                                    file:bg-blue-50 file:text-blue-700
+                                    hover:file:bg-blue-100"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
+                            {errors[`certifications.${index}.file`] && (
+                                <InputError message={errors[`certifications.${index}.file`]} className="mt-2" />
+                            )}
                         </div>
                         {formData.certifications.length > 1 && (
                             <button

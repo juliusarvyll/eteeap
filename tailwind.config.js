@@ -14,6 +14,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                old: ['Old English Text MT', ...defaultTheme.fontFamily.sans],
             },
         },
     },

@@ -442,31 +442,75 @@ export default function MultiStepForm() {
 
                 return awardsFormData;
 
-            case 6:
-                return <CreativeWorksStep 
-                    formData={formData} 
-                    errors={errors} 
-                    handleArrayFieldChange={handleArrayFieldChange}
-                    addArrayItem={addArrayItem}
-                    removeArrayItem={removeArrayItem}
-                />;
-            case 7:
-                return <LifelongLearningStep 
-                    formData={formData} 
-                    errors={errors} 
-                    handleInputChange={handleInputChange}
-                    handleArrayFieldChange={handleArrayFieldChange}
-                    addArrayItem={addArrayItem}
-                    removeArrayItem={removeArrayItem}
-                />;
-            case 8:
-                return <EssayStep 
-                    formData={formData} 
-                    errors={errors} 
-                    handleInputChange={handleInputChange}
-                />;
-            case 9:
-                return <ConfirmationStep formData={formData} />;
+            case 6: // Creative Works
+                const creativeWorksFormData = new FormData();
+                creativeWorksFormData.append('applicant_id', formData.applicant_id);
+                
+                // Append each creative work as a separate entry
+                formData.creativeWorks.forEach((work, index) => {
+                    creativeWorksFormData.append(`creativeWorks[${index}][title]`, work.title);
+                    creativeWorksFormData.append(`creativeWorks[${index}][description]`, work.description);
+                    creativeWorksFormData.append(`creativeWorks[${index}][significance]`, work.significance);
+                    creativeWorksFormData.append(`creativeWorks[${index}][dateCompleted]`, work.dateCompleted);
+                    creativeWorksFormData.append(`creativeWorks[${index}][corroboratingBody]`, work.corroboratingBody);
+                });
+
+                return creativeWorksFormData;
+
+            case 7: // Lifelong Learning
+                const lifelongLearningFormData = new FormData();
+                lifelongLearningFormData.append('applicant_id', formData.applicant_id);
+                
+                // Hobbies
+                formData.hobbies.forEach((hobby, index) => {
+                    lifelongLearningFormData.append(`hobbies[${index}][description]`, hobby.description);
+                });
+
+                // Special Skills
+                formData.specialSkills.forEach((skill, index) => {
+                    lifelongLearningFormData.append(`specialSkills[${index}][description]`, skill.description);
+                });
+
+                // Work Activities
+                formData.workActivities.forEach((activity, index) => {
+                    lifelongLearningFormData.append(`workActivities[${index}][description]`, activity.description);
+                });
+
+                // Volunteer Activities
+                formData.volunteerActivities.forEach((activity, index) => {
+                    lifelongLearningFormData.append(`volunteerActivities[${index}][description]`, activity.description);
+                });
+
+                // Travels
+                formData.travels.forEach((travel, index) => {
+                    lifelongLearningFormData.append(`travels[${index}][description]`, travel.description);
+                });
+
+                return lifelongLearningFormData;
+
+            case 8: // Essay
+                const essayFormData = new FormData();
+                essayFormData.append('applicant_id', formData.applicant_id);
+                essayFormData.append('essay', formData.essay);
+                return essayFormData;
+
+            case 9: // Confirmation/Documents
+                const confirmationFormData = new FormData();
+                confirmationFormData.append('applicant_id', formData.applicant_id);
+                
+                // Append documents if they exist
+                if (formData.birthCertificate instanceof File) {
+                    confirmationFormData.append('birthCertificate', formData.birthCertificate);
+                }
+                if (formData.marriageCertificate instanceof File) {
+                    confirmationFormData.append('marriageCertificate', formData.marriageCertificate);
+                }
+                if (formData.legalDocument instanceof File) {
+                    confirmationFormData.append('legalDocument', formData.legalDocument);
+                }
+
+                return confirmationFormData;
+
             default:
                 return {};
         }
@@ -542,7 +586,7 @@ export default function MultiStepForm() {
         // You might get this from props or an API call
         setFormData(prevState => ({
             ...prevState,
-            applicant_id: 'APP-2025-00003' // Or however you get this value
+            
         }));
     }, []);
 

@@ -99,4 +99,22 @@ class PersonalInfo extends Model
     {
         return $this->education()->where('type', 'certification');
     }
+
+    // Creative Works - One to Many
+    public function creativeWorks(): HasMany
+    {
+        return $this->hasMany(CreativeWork::class, 'applicant_id', 'applicant_id');
+    }
+
+    // Lifelong Learning - One to Many
+    public function lifelongLearning(): HasMany
+    {
+        return $this->hasMany(LifelongLearning::class, 'applicant_id', 'applicant_id');
+    }
+
+    // Essay - One to One
+    public function essay(): HasOne
+    {
+        return $this->hasOne(Essay::class, 'applicant_id', 'applicant_id');
+    }
 }

@@ -7,7 +7,6 @@ import PrimaryButton from '@/Components/PrimaryButton';
 export default function HonorsAwardsStep({
     formData,
     errors,
-    handleInputChange,
     handleArrayFieldChange,
     addArrayItem,
     removeArrayItem

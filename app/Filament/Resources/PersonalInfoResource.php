@@ -294,6 +294,54 @@ class PersonalInfoResource extends Resource
                                     ->date(),
                             ])->columns(3),
                     ]),
+
+                Section::make('Creative Works')
+                    ->schema([
+                        RepeatableEntry::make('creativeWorks')
+                            ->schema([
+                                TextEntry::make('title')
+                                    ->label('Title'),
+                                TextEntry::make('description')
+                                    ->label('Description')
+                                    ->markdown(),
+                                TextEntry::make('significance')
+                                    ->label('Significance')
+                                    ->markdown(),
+                                TextEntry::make('date_completed')
+                                    ->label('Date Completed')
+                                    ->date(),
+                                TextEntry::make('corroborating_body')
+                                    ->label('Corroborating Body'),
+                            ])->columns(2),
+                    ]),
+
+                Section::make('Lifelong Learning')
+                    ->schema([
+                        RepeatableEntry::make('lifelongLearning')
+                            ->schema([
+                                TextEntry::make('type')
+                                    ->label('Type')
+                                    ->badge()
+                                    ->color(fn (string $state): string => match ($state) {
+                                        'hobby' => 'info',
+                                        'skill' => 'success',
+                                        'work' => 'warning',
+                                        'volunteer' => 'primary',
+                                        'travel' => 'danger',
+                                        default => 'gray',
+                                    }),
+                                TextEntry::make('description')
+                                    ->label('Description')
+                                    ->markdown(),
+                            ])->columns(2),
+                    ]),
+
+                Section::make('Essay')
+                    ->schema([
+                        TextEntry::make('essay.content')
+                            ->label('Content')
+                            ->markdown(),
+                    ]),
             ]);
     }
 

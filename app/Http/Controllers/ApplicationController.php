@@ -411,9 +411,9 @@ class ApplicationController extends Controller
                         CreativeWork::where('applicant_id', $request->applicant_id)->delete();
 
                         // Create new records
-                        foreach ($request->creativeWorks as $work) {
+                        foreach ($validatedData['creativeWorks'] as $work) {
                             CreativeWork::create([
-                                'applicant_id' => $request->applicant_id,  // Make sure this is passed from the frontend
+                                'applicant_id' => $validatedData['applicant_id'],
                                 'title' => $work['title'],
                                 'description' => $work['description'],
                                 'significance' => $work['significance'],
@@ -425,7 +425,7 @@ class ApplicationController extends Controller
                         // Debug logging
                         \Log::info('Creative works saved successfully', [
                             'applicant_id' => $request->applicant_id,
-                            'count' => count($request->creativeWorks)
+                            'count' => count($validatedData['creativeWorks'])
                         ]);
 
                     } catch (\Exception $e) {
@@ -543,7 +543,7 @@ class ApplicationController extends Controller
             $personalInfo = PersonalInfo::with([
                 'learningObjective',
                 'education',
-                'workExperience',
+                'workExperiences',
                 'creativeWorks',
                 'lifelongLearning',
                 'essay'
@@ -557,7 +557,7 @@ class ApplicationController extends Controller
             if (!$personalInfo->education()->where('type', 'elementary')->exists()) {
                 throw new \Exception('Education section is incomplete - Elementary education required');
             }
-            if (!$personalInfo->workExperience()->exists()) {
+            if (!$personalInfo->workExperiences()->exists()) {
                 throw new \Exception('Work experience section is incomplete');
             }
             if (!$personalInfo->creativeWorks()->exists()) {
