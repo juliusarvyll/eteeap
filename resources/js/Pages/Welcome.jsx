@@ -33,13 +33,21 @@ export default function Welcome() {
                                         Expanded Tertiary Education Equivalency and Accreditation Program - 
                                         Your pathway to recognizing learning through work and life experiences.
                                     </p>
-                                    <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                    <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-3">
                                         <div className="rounded-md shadow">
                                             <Link
-                                                href="/application-form"
+                                                href="/dashboard"
                                                 className="flex w-full items-center justify-center rounded-md border border-transparent bg-green-700 px-8 py-3 text-base font-medium text-white hover:bg-green-800 md:px-10 md:py-4 md:text-lg"
                                             >
                                                 Start Application
+                                            </Link>
+                                        </div>
+                                        <div className="mt-3 sm:mt-0">
+                                            <Link
+                                                href="/track-application"
+                                                className="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 md:px-10 md:py-4 md:text-lg"
+                                            >
+                                                Track Application
                                             </Link>
                                         </div>
                                         <div className="mt-3 sm:ml-3 sm:mt-0">

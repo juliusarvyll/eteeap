@@ -473,6 +473,88 @@
     @endif
 
     <div class="section">
+        <div class="section-title">Merged Documents</div>
+        
+        @if($record->document)
+        <div class="subsection">
+            <div class="section-title" style="font-size: 13px; padding: 5px; margin-bottom: 8px;">Personal Document</div>
+            <div class="field">
+                <iframe 
+                    src="{{ Storage::url($record->document) }}"
+                    width="100%"
+                    height="600px"
+                    frameborder="0"
+                ></iframe>
+            </div>
+        </div>
+        @endif
+        
+        @foreach($record->education as $edu)
+            @if(!empty($edu->diploma_file))
+            <div class="subsection">
+                <div class="section-title" style="font-size: 13px; padding: 5px; margin-bottom: 8px;">
+                    {{ match($edu->type) {
+                        'elementary' => 'Elementary Diploma',
+                        'high_school' => 'High School Diploma',
+                        'post_secondary' => 'Post Secondary Diploma',
+                        'non_formal' => 'Non-Formal Certificate',
+                        default => 'Education Document'
+                    } }}
+                </div>
+                <div class="field">
+                    <iframe 
+                        src="{{ Storage::url($edu->diploma_file) }}"
+                        width="100%"
+                        height="600px"
+                        frameborder="0"
+                    ></iframe>
+                </div>
+            </div>
+            @endif
+        @endforeach
+        
+        @foreach($record->workExperiences as $exp)
+            @if(!empty($exp->documents))
+                @foreach((array)$exp->documents as $doc)
+                <div class="subsection">
+                    <div class="section-title" style="font-size: 13px; padding: 5px; margin-bottom: 8px;">
+                        Work Experience Document
+                    </div>
+                    <div class="field">
+                        <iframe 
+                            src="{{ Storage::url($doc) }}"
+                            width="100%"
+                            height="600px"
+                            frameborder="0"
+                        ></iframe>
+                    </div>
+                </div>
+                @endforeach
+            @endif
+        @endforeach
+        
+        @foreach(['academicAwards', 'communityAwards', 'workAwards'] as $awardType)
+            @foreach($record->{$awardType} as $award)
+                @if(!empty($award->document))
+                <div class="subsection">
+                    <div class="section-title" style="font-size: 13px; padding: 5px; margin-bottom: 8px;">
+                        {{ ucfirst(str_replace('Awards', '', $awardType)) }} Award Document
+                    </div>
+                    <div class="field">
+                        <iframe 
+                            src="{{ Storage::url($award->document) }}"
+                            width="100%"
+                            height="600px"
+                            frameborder="0"
+                        ></iframe>
+                    </div>
+                </div>
+                @endif
+            @endforeach
+        @endforeach
+    </div>
+
+    <div class="section">
         <div class="section-title">Uploaded Documents</div>
         
         @if($record->document)

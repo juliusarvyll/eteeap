@@ -3,9 +3,22 @@ import { Link } from '@inertiajs/react';
 
 export default function ConfirmationStep({ formData }) {
     useEffect(() => {
-        // You might want to trigger some final submission logic here
-        console.log('Confirmation step mounted');
-    }, []);
+        // Add validation logging
+        if (!formData?.applicant_id) {
+            console.error('ConfirmationStep: Missing applicant_id in formData', formData);
+        } else {
+            console.log('ConfirmationStep: Received applicant_id:', formData.applicant_id);
+        }
+    }, [formData]);
+
+    // Add null check to prevent rendering without applicant_id
+    if (!formData?.applicant_id) {
+        return (
+            <div className="text-center text-red-600">
+                Error: Application ID not found. Please try again.
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">
@@ -52,7 +65,7 @@ export default function ConfirmationStep({ formData }) {
 
             <div className="flex justify-center space-x-4">
                 <Link
-                    href={route('dashboard')}
+                    href={route('Dashboard')}
                     className="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                 >
                     Return to Dashboard

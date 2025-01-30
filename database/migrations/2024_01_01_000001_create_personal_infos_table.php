@@ -14,13 +14,15 @@ return new class extends Migration
             $table->string('firstName');
             $table->string('middleName')->nullable();
             $table->string('lastName');
+            $table->string('address');
+            $table->string('phoneNumber');
+            $table->string('zipCode');
             $table->string('suffix')->nullable();
             $table->date('birthDate');
             $table->string('placeOfBirth');
             $table->string('civilStatus');
             $table->string('document')->nullable();
             $table->string('sex');
-            $table->string('religion')->nullable();
             $table->string('languages');
             $table->string('status')->default('draft');
             $table->timestamps();

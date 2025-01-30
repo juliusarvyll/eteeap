@@ -24,8 +24,7 @@ const STEPS = [
     { number: 5, title: 'Honors & Awards' },
     { number: 6, title: 'Creative Works' },
     { number: 7, title: 'Lifelong Learning' },
-    { number: 8, title: 'Essay' },
-    { number: 9, title: 'Confirmation' }
+    { number: 8, title: 'Essay & Submit' }
 ];
 
 export default function MultiStepForm() {
@@ -41,7 +40,6 @@ export default function MultiStepForm() {
         placeOfBirth: '',  
         civilStatus: '',
         sex: '',
-        religion: '',
         languages: '',
         document: null,
         status: '',
@@ -219,7 +217,7 @@ export default function MultiStepForm() {
             // Add proper headers for FormData
             const config = {
                 headers: {
-                    'Content-Type': (currentStep === 1 || currentStep === 3 || currentStep === 4 || currentStep === 5) 
+                    'Content-Type': (currentStep === 1 || currentStep === 3 || currentStep === 4 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8) 
                         ? 'multipart/form-data' 
                         : 'application/json',
                 },
@@ -494,23 +492,6 @@ export default function MultiStepForm() {
                 essayFormData.append('essay', formData.essay);
                 return essayFormData;
 
-            case 9: // Confirmation/Documents
-                const confirmationFormData = new FormData();
-                confirmationFormData.append('applicant_id', formData.applicant_id);
-                
-                // Append documents if they exist
-                if (formData.birthCertificate instanceof File) {
-                    confirmationFormData.append('birthCertificate', formData.birthCertificate);
-                }
-                if (formData.marriageCertificate instanceof File) {
-                    confirmationFormData.append('marriageCertificate', formData.marriageCertificate);
-                }
-                if (formData.legalDocument instanceof File) {
-                    confirmationFormData.append('legalDocument', formData.legalDocument);
-                }
-
-                return confirmationFormData;
-
             default:
                 return {};
         }
@@ -521,30 +502,31 @@ export default function MultiStepForm() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (currentStep < STEPS.length - 1) {
-            handleNext();
-        } else {
-            setLoading(true);
-            try {
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
+
+        setLoading(true);
+        try {
+            // Save current step if we're on the final step
+            if (currentStep === STEPS.length) {
+                await handleNext(); // This will save the essay step
+            }
+
+            // Only finalize after successful step save
+            if (currentStep > STEPS.length) {
                 const response = await axios.post('/application/finalize', {
                     applicant_id: formData.applicant_id,
                     status: 'pending'
                 });
                 
-                setFormData(prev => ({
-                    ...prev,
-                    status: 'pending'
-                }));
-                
-                setCurrentStep(STEPS.length);
-                setLoading(false);
-            } catch (error) {
-                setLoading(false);
-                setErrors({
-                    submit: 'Failed to submit application. Please try again.'
-                });
+                setFormData(prev => ({ ...prev, status: 'pending' }));
+                setCurrentStep(STEPS.length + 1);
             }
+        } catch (error) {
+            setErrors({ submit: 'Failed to submit application. Please try again.' });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -591,6 +573,10 @@ export default function MultiStepForm() {
     }, []);
 
     const renderStep = () => {
+        if (currentStep > STEPS.length) {
+            return <ConfirmationStep formData={formData} />;
+        }
+
         switch (currentStep) {
             case 1:
                 return <PersonalInfoStep 
@@ -652,9 +638,8 @@ export default function MultiStepForm() {
                     formData={formData} 
                     errors={errors} 
                     handleInputChange={handleInputChange}
+                    onSubmit={handleSubmit}
                 />;
-            case 9:
-                return <ConfirmationStep formData={formData} />;
             default:
                 return null;
         }
@@ -668,84 +653,88 @@ export default function MultiStepForm() {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
-                            <h2 className="mb-6 text-xl font-semibold leading-tight text-gray-800">
-                                ETEEAP Admission Form
-                            </h2>
-                            
-                            {/* Updated Progress Bar */}
-                            <div className="mb-8">
-                                <div className="flex flex-wrap justify-between gap-2">
-                                    {STEPS.map((step) => (
-                                        <div
-                                            key={step.number}
-                                            className="flex flex-col items-center space-y-2"
-                                        >
-                                            <div
-                                                className={`
-                                                    flex h-8 w-8 items-center justify-center rounded-full 
-                                                    ${step.number <= currentStep
-                                                        ? 'bg-indigo-600 text-white'
-                                                        : 'bg-gray-200 text-gray-600'
-                                                    }
-                                                `}
-                                            >
-                                                {step.number}
-                                            </div>
-                                            <span 
-                                                className={`
-                                                    text-xs text-center whitespace-nowrap
-                                                    ${step.number <= currentStep
-                                                        ? 'text-indigo-600 font-medium'
-                                                        : 'text-gray-500'
-                                                    }
-                                                `}
-                                            >
-                                                {step.title}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                                {/* Progress Line */}
-                                <div className="mt-4 hidden md:block">
-                                    <div className="relative">
-                                        <div className="absolute left-0 top-1/2 h-0.5 w-full bg-gray-200"></div>
-                                        <div 
-                                            className="absolute left-0 top-1/2 h-0.5 bg-indigo-600 transition-all duration-300"
-                                            style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <form onSubmit={handleSubmit}>
-                                {renderStep()}
-
-                                <div className="mt-6 flex justify-between">
-                                    {currentStep > 1 && (
-                                        <SecondaryButton
-                                            type="button"
-                                            onClick={handlePrevious}
-                                        >
-                                            Previous
-                                        </SecondaryButton>
-                                    )}
+                            {currentStep <= STEPS.length ? (
+                                <>
+                                    <h2 className={`mb-6 text-xl font-semibold leading-tight text-gray-800 ${currentStep === 8 ? 'hidden' : ''}`}>
+                                        ETEEAP Admission Form
+                                    </h2>
                                     
-                                    <div className="ml-auto">
-                                        {currentStep < STEPS.length ? (
-                                            <PrimaryButton
-                                                type="button"
-                                                onClick={handleNext}
-                                            >
-                                                Next
-                                            </PrimaryButton>
-                                        ) : (
-                                            <PrimaryButton type="submit">
-                                                Submit
-                                            </PrimaryButton>
-                                        )}
+                                    {/* Updated Progress Bar */}
+                                    <div className={`mb-8 ${currentStep === 8 ? 'hidden' : ''}`}>
+                                        <div className="flex flex-wrap justify-between gap-2">
+                                            {STEPS.map((step) => (
+                                                <div
+                                                    key={step.number}
+                                                    className="flex flex-col items-center space-y-2"
+                                                >
+                                                    <div
+                                                        className={`
+                                                            flex h-8 w-8 items-center justify-center rounded-full 
+                                                            ${step.number <= currentStep
+                                                                ? 'bg-indigo-600 text-white'
+                                                                : 'bg-gray-200 text-gray-600'
+                                                            }
+                                                        `}
+                                                    >
+                                                        {step.number}
+                                                    </div>
+                                                    <span 
+                                                        className={`
+                                                            text-xs text-center whitespace-nowrap
+                                                            ${step.number <= currentStep
+                                                                ? 'text-indigo-600 font-medium'
+                                                                : 'text-gray-500'
+                                                            }
+                                                        `}
+                                                    >
+                                                        {step.title}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {/* Progress Line */}
+                                        <div className="mt-4 hidden md:block">
+                                            <div className="relative">
+                                                <div className="absolute left-0 top-1/2 h-0.5 w-full bg-gray-200"></div>
+                                                <div 
+                                                    className="absolute left-0 top-1/2 h-0.5 bg-indigo-600 transition-all duration-300"
+                                                    style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </form>
+
+                                    <form onSubmit={handleSubmit}>
+                                        {renderStep()}
+
+                                        <div className="mt-6 flex justify-between">
+                                            {currentStep > 1 && (
+                                                <SecondaryButton
+                                                    type="button"
+                                                    onClick={handlePrevious}
+                                                >
+                                                    Previous
+                                                </SecondaryButton>
+                                            )}
+                                            
+                                            <div className="ml-auto">
+                                                {currentStep < STEPS.length ? (
+                                                    <PrimaryButton
+                                                        type="button"
+                                                        onClick={handleNext}
+                                                    >
+                                                        Next
+                                                    </PrimaryButton>
+                                                ) : (
+                                                    <div className="hidden"></div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </form>
+                                </>
+                            ) : (
+                                renderStep()  // Shows ConfirmationStep
+                            )}
                         </div>
                     </div>
                 </div>

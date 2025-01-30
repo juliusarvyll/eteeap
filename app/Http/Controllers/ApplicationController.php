@@ -19,6 +19,9 @@ use App\Models\Essay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewApplicationSubmitted;
+use App\Models\User;
 
 class ApplicationController extends Controller
 {
@@ -572,6 +575,8 @@ class ApplicationController extends Controller
 
             // Update application status to pending
             $personalInfo->update(['status' => 'pending']);
+            $admins = User::all();
+            Notification::send($admins, new NewApplicationSubmitted($personalInfo));
 
             return response()->json([
                 'message' => 'Application submitted successfully',
@@ -607,6 +612,61 @@ class ApplicationController extends Controller
                 'error' => 'Failed to load application',
                 'message' => $e->getMessage()
             ], 404);
+        }
+    }
+
+    public function trackApplication(Request $request)
+    {
+        try {
+            $request->validate([
+                'applicant_id' => 'required|string|exists:personal_infos,applicant_id'
+            ]);
+
+            $application = PersonalInfo::with([
+                    'learningObjective',
+                    'education',
+                    'workExperiences',
+                    'academicAwards',
+                    'communityAwards',
+                    'workAwards',
+                    'creativeWorks',
+                    'lifelongLearning',
+                    'essay'
+                ])
+                ->where('applicant_id', $request->applicant_id)
+                ->firstOrFail();
+
+            return response()->json([
+                'status' => 'success',
+                'application' => [
+                    'id' => $application->applicant_id,
+                    'status' => $application->status,
+                    'submitted_at' => $application->created_at->format('M d, Y h:i A'),
+                    'personal_info' => $application,
+                    'education' => $application->education,
+                    'work_experience' => $application->workExperiences,
+                    // Add other relationships as needed
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid Application ID'
+            ], 422);
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Application not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            \Log::error('Tracking error: '.$e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve application status'
+            ], 500);
         }
     }
 }
