@@ -51,10 +51,10 @@ class NewApplicationSubmitted extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable)
     {
         return [
-            'applicant_id' => $this->application->applicant_id,
-            'applicant_name' => $this->application->firstName . ' ' . $this->application->lastName,
-            'submitted_at' => now()->toDateTimeString(),
-            'message' => 'New application submitted by ' . $this->application->firstName . ' ' . $this->application->lastName
+            'title' => 'New Application Submitted',
+            'message' => 'Application from: '.$this->application->full_name,
+            'link' => route('filament.resources.personal-infos.view', $this->application->id),
+            'icon' => 'heroicon-o-document-text',
         ];
     }
 }

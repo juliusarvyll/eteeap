@@ -575,8 +575,56 @@ class ApplicationController extends Controller
 
             // Update application status to pending
             $personalInfo->update(['status' => 'pending']);
+            
+            // Filament-specific notification
             $admins = User::all();
-            Notification::send($admins, new NewApplicationSubmitted($personalInfo));
+            $successCount = 0;
+            $errorCount = 0;
+
+            \Log::info('Initiating admin notifications for application', [
+                'applicant_id' => $personalInfo->applicant_id,
+                'total_admins' => count($admins),
+                'application_status' => 'pending'
+            ]);
+
+            foreach ($admins as $admin) {
+                try {
+                    \Log::debug('Attempting to notify admin', [
+                        'admin_id' => $admin->id,
+                        'admin_email' => $admin->email,
+                        'notification_type' => NewApplicationSubmitted::class
+                    ]);
+
+                    $notification = (new NewApplicationSubmitted($personalInfo))
+                        ->onQueue('notifications')
+                        ->sendToDatabase(true);
+
+                    $admin->notify($notification);
+                    $successCount++;
+
+                    \Log::debug('Notification successfully queued for admin', [
+                        'admin_id' => $admin->id,
+                        'queue' => 'notifications',
+                        'notification_id' => $notification->id ?? 'unknown'
+                    ]);
+
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    \Log::error('Failed to notify admin', [
+                        'admin_id' => $admin->id,
+                        'error_message' => $e->getMessage(),
+                        'exception' => get_class($e),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            }
+
+            \Log::info('Completed admin notifications', [
+                'applicant_id' => $personalInfo->applicant_id,
+                'successful_notifications' => $successCount,
+                'failed_notifications' => $errorCount,
+                'completion_time' => now()->toDateTimeString()
+            ]);
 
             return response()->json([
                 'message' => 'Application submitted successfully',

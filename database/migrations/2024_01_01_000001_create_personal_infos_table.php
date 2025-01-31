@@ -14,9 +14,6 @@ return new class extends Migration
             $table->string('firstName');
             $table->string('middleName')->nullable();
             $table->string('lastName');
-            $table->string('address');
-            $table->string('phoneNumber');
-            $table->string('zipCode');
             $table->string('suffix')->nullable();
             $table->date('birthDate');
             $table->string('placeOfBirth');

@@ -349,21 +349,31 @@ class PersonalInfoResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('applicant_id')
+                    ->label('Application ID')
+                    ->searchable()
+                    ->sortable(),
+                
                 Tables\Columns\TextColumn::make('firstName')
-                    ->label('First Name'),
-                Tables\Columns\TextColumn::make('middleName')
-                    ->label('Middle Name'),
+                    ->label('First Name')
+                    ->searchable(),
+                
                 Tables\Columns\TextColumn::make('lastName')
-                    ->label('Last Name'),
+                    ->label('Last Name')
+                    ->searchable(),
+                
+                
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Application Status')
+                    ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'warning',
                         'approved' => 'success',
                         'rejected' => 'danger',
                         default => 'gray',
-                    }),
+                    })
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -376,7 +386,8 @@ class PersonalInfoResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->searchable();
     }
 
     public static function getRelations(): array
@@ -394,5 +405,10 @@ class PersonalInfoResource extends Resource
             'view' => Pages\ViewPersonalInfo::route('/{record}'),
             'edit' => Pages\EditPersonalInfo::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'pending')->count();
     }
 }
