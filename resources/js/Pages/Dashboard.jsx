@@ -15,6 +15,7 @@ import LifelongLearningStep from './Components/LifelongLearningStep';
 import EssayStep from './Components/EssayStep';
 import ConfirmationStep from './Components/ConfirmationStep';
 import axios from 'axios';
+import NavBar from '@/Components/NavBar';
 
 const STEPS = [
     { number: 1, title: 'Personal Info' },
@@ -45,7 +46,7 @@ export default function MultiStepForm() {
         status: '',
         address: '',
         zipCode: '',
-        contactNumber: '',
+        phoneNumber: '',
         nationality: '',
         
         
@@ -272,7 +273,8 @@ export default function MultiStepForm() {
                 // Add missing required fields
                 formDataObj.append('address', formData.address);
                 formDataObj.append('zipCode', formData.zipCode);
-                formDataObj.append('contactNumber', formData.contactNumber);
+                formDataObj.append('phoneNumber', formData.phoneNumber);
+                formDataObj.append('email', formData.email);
                 formDataObj.append('nationality', formData.nationality);
                 
                 // Only append document if it exists and is a file
@@ -514,7 +516,7 @@ export default function MultiStepForm() {
             }
 
             // Only finalize after successful step save
-            if (currentStep > STEPS.length) {
+            if (currentStep === STEPS.length) {
                 const response = await axios.post('/application/finalize', {
                     applicant_id: formData.applicant_id,
                     status: 'pending'
@@ -648,7 +650,7 @@ export default function MultiStepForm() {
     return (
         <>
             <Head title="ETEEAP Admission Form" />
-
+            <NavBar />
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">

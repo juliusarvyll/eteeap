@@ -4,6 +4,7 @@ import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import axios from 'axios';
+import NavBar from '@/Components/NavBar';
 
 export default function TrackApplication() {
     const [application, setApplication] = useState(null);
@@ -44,7 +45,7 @@ export default function TrackApplication() {
     return (
         <>
             <Head title="Track Application Status" />
-            
+            <NavBar />
             <div className="min-h-screen bg-gray-50 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="max-w-3xl mx-auto">

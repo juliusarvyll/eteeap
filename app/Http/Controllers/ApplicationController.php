@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewApplicationSubmitted;
 use App\Models\User;
+use App\Jobs\SendApplicationNotifications;
+use App\Events\ApplicantNotification;
 
 class ApplicationController extends Controller
 {
@@ -53,8 +55,9 @@ class ApplicationController extends Controller
                         'middleName' => 'nullable|string|max:255',
                         'lastName' => 'required|string|max:255',
                         'address' => 'required|string',
+                        'email' => 'required|email|max:255',
+                        'phoneNumber' => 'required|string|max:50',
                         'zipCode' => 'required|string|max:20',
-                        'contactNumber' => 'required|string|max:50',
                         'birthDate' => 'required|date',
                         'placeOfBirth' => 'required|string|max:255',
                         'civilStatus' => 'required|string|in:Single,Married,Separated,Widow,Divorced',
@@ -509,6 +512,18 @@ class ApplicationController extends Controller
                         ['applicant_id' => $request->applicant_id],
                         ['content' => $validatedData['essay']]
                     );
+                    
+                    // Get the application instance
+                    $application = PersonalInfo::where('applicant_id', $request->applicant_id)->firstOrFail();
+                    $application->update(['status' => 'pending']);
+
+                    // Dispatch the event instead of sending notification directly
+                    event(new ApplicantNotification($application));
+
+                    \Log::info('Application submitted notifications queued', [
+                        'applicant_id' => $request->applicant_id,
+                        'timestamp' => now()
+                    ]);
                     break;
             }
 
@@ -543,88 +558,14 @@ class ApplicationController extends Controller
     public function finalizeApplication(Request $request)
     {
         try {
-            $personalInfo = PersonalInfo::with([
-                'learningObjective',
-                'education',
-                'workExperiences',
-                'creativeWorks',
-                'lifelongLearning',
-                'essay'
-            ])->where('applicant_id', $request->applicant_id)
-              ->firstOrFail();
+            $application = PersonalInfo::where('applicant_id', $request->applicant_id);
 
-            // Verify all required sections are completed
-            if (!$personalInfo->learningObjective) {
-                throw new \Exception('Learning objectives section is incomplete');
-            }
-            if (!$personalInfo->education()->where('type', 'elementary')->exists()) {
-                throw new \Exception('Education section is incomplete - Elementary education required');
-            }
-            if (!$personalInfo->workExperiences()->exists()) {
-                throw new \Exception('Work experience section is incomplete');
-            }
-            if (!$personalInfo->creativeWorks()->exists()) {
-                throw new \Exception('Creative works section is incomplete');
-            }
-            if (!$personalInfo->lifelongLearning()->exists()) {
-                throw new \Exception('Lifelong learning section is incomplete');
-            }
-            if (!$personalInfo->essay) {
-                throw new \Exception('Essay section is incomplete');
-            }
-
-            // Update application status to pending
-            $personalInfo->update(['status' => 'pending']);
-            
-            // Filament-specific notification
-            $admins = User::all();
-            $successCount = 0;
-            $errorCount = 0;
-
-            \Log::info('Initiating admin notifications for application', [
-                'applicant_id' => $personalInfo->applicant_id,
-                'total_admins' => count($admins),
-                'application_status' => 'pending'
-            ]);
-
-            foreach ($admins as $admin) {
-                try {
-                    \Log::debug('Attempting to notify admin', [
-                        'admin_id' => $admin->id,
-                        'admin_email' => $admin->email,
-                        'notification_type' => NewApplicationSubmitted::class
-                    ]);
-
-                    $notification = (new NewApplicationSubmitted($personalInfo))
-                        ->onQueue('notifications')
-                        ->sendToDatabase(true);
-
-                    $admin->notify($notification);
-                    $successCount++;
-
-                    \Log::debug('Notification successfully queued for admin', [
-                        'admin_id' => $admin->id,
-                        'queue' => 'notifications',
-                        'notification_id' => $notification->id ?? 'unknown'
-                    ]);
-
-                } catch (\Exception $e) {
-                    $errorCount++;
-                    \Log::error('Failed to notify admin', [
-                        'admin_id' => $admin->id,
-                        'error_message' => $e->getMessage(),
-                        'exception' => get_class($e),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                }
-            }
-
-            \Log::info('Completed admin notifications', [
-                'applicant_id' => $personalInfo->applicant_id,
-                'successful_notifications' => $successCount,
-                'failed_notifications' => $errorCount,
-                'completion_time' => now()->toDateTimeString()
-            ]);
+            DB::transaction(function () use ($application) {
+                $application->update(['status' => 'pending']);
+                
+                // Send notifications directly to admins
+                
+            });
 
             return response()->json([
                 'message' => 'Application submitted successfully',
@@ -632,6 +573,7 @@ class ApplicationController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Finalization failed: '.$e->getMessage());
             return response()->json([
                 'error' => 'Failed to submit application',
                 'message' => $e->getMessage()

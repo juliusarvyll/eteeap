@@ -73,9 +73,9 @@ export default function PersonalInfoStep({ formData, errors, handleInputChange }
 
     return (
         <div className="space-y-6">
-            {/* Full Name Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+            {/* Name Section - Added Suffix */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="col-span-1">
                     <InputLabel htmlFor="lastName" value="Last Name" required />
                     <TextInput
                         id="lastName"
@@ -84,11 +84,9 @@ export default function PersonalInfoStep({ formData, errors, handleInputChange }
                         className={`mt-1 block w-full ${errors.lastName ? 'error-field border-red-500' : ''}`}
                         onChange={handleInputChange}
                     />
-                    {errors.lastName && (
-                        <InputError message={errors.lastName} className="mt-2" />
-                    )}
+                    {errors.lastName && <InputError message={errors.lastName} className="mt-2" />}
                 </div>
-                <div>
+                <div className="col-span-1">
                     <InputLabel htmlFor="firstName" value="First Name" required />
                     <TextInput
                         id="firstName"
@@ -97,11 +95,9 @@ export default function PersonalInfoStep({ formData, errors, handleInputChange }
                         className={`mt-1 block w-full ${errors.firstName ? 'error-field border-red-500' : ''}`}
                         onChange={handleInputChange}
                     />
-                    {errors.firstName && (
-                        <InputError message={errors.firstName} className="mt-2" />
-                    )}
+                    {errors.firstName && <InputError message={errors.firstName} className="mt-2" />}
                 </div>
-                <div>
+                <div className="col-span-1">
                     <InputLabel htmlFor="middleName" value="Middle Name" />
                     <TextInput
                         id="middleName"
@@ -111,6 +107,29 @@ export default function PersonalInfoStep({ formData, errors, handleInputChange }
                         onChange={handleInputChange}
                     />
                 </div>
+                <div className="col-span-1">
+                    <InputLabel htmlFor="suffix" value="Suffix" />
+                    <TextInput
+                        id="suffix"
+                        name="suffix"
+                        value={formData.suffix}
+                        className="mt-1 block w-full"
+                        onChange={handleInputChange}
+                        placeholder="e.g., Jr., Sr., III"
+                    />
+                </div>
+            </div>
+
+            {/* Added Religion Field */}
+            <div>
+                <InputLabel htmlFor="religion" value="Religion" />
+                <TextInput
+                    id="religion"
+                    name="religion"
+                    value={formData.religion}
+                    className="mt-1 block w-full"
+                    onChange={handleInputChange}
+                />
             </div>
 
             {/* Address */}
@@ -144,19 +163,35 @@ export default function PersonalInfoStep({ formData, errors, handleInputChange }
                 )}
             </div>
 
-            {/* Contact Number */}
+            {/* Contact Number - Fix field name */}
             <div>
-                <InputLabel htmlFor="contactNumber" value="Telephone/Mobile Number(s)" required />
+                <InputLabel htmlFor="phoneNumber" value="Telephone/Mobile Number(s)" required />
                 <TextInput
-                    id="contactNumber"
-                    name="contactNumber"
-                    value={formData.contactNumber}
-                    className={`mt-1 block w-full ${errors.contactNumber ? 'error-field border-red-500' : ''}`}
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    className={`mt-1 block w-full ${errors.phoneNumber ? 'error-field border-red-500' : ''}`}
                     placeholder="Include area code for areas outside Metro Manila"
                     onChange={handleInputChange}
                 />
-                {errors.contactNumber && (
-                    <InputError message={errors.contactNumber} className="mt-2" />
+                {errors.phoneNumber && (
+                    <InputError message={errors.phoneNumber} className="mt-2" />
+                )}
+            </div>
+
+            {/* Add Missing Email Field */}
+            <div>
+                <InputLabel htmlFor="email" value="Email Address" required />
+                <TextInput
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    className={`mt-1 block w-full ${errors.email ? 'error-field border-red-500' : ''}`}
+                    onChange={handleInputChange}
+                />
+                {errors.email && (
+                    <InputError message={errors.email} className="mt-2" />
                 )}
             </div>
 
