@@ -18,15 +18,26 @@ class WorkExperience extends Model
         'supervisorName',
         'reasonForLeaving',
         'responsibilities',
-        'references',
         'documents'
     ];
 
     protected $casts = [
         'references' => 'array',
-        'dateFrom' => 'date',
-        'dateTo' => 'date'
+        'dateFrom' => 'integer',
+        'dateTo' => 'integer'
     ];
+
+    // Mutator for dateFrom
+    public function setDateFromAttribute($value)
+    {
+        $this->attributes['dateFrom'] = is_numeric($value) ? (int)$value : null;
+    }
+
+    // Mutator for dateTo
+    public function setDateToAttribute($value)
+    {
+        $this->attributes['dateTo'] = is_numeric($value) ? (int)$value : null;
+    }
 
     public function personalInfo(): BelongsTo
     {

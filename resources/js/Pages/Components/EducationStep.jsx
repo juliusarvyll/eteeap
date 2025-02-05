@@ -54,26 +54,37 @@ export default function EducationStep({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel htmlFor="elementaryDateFrom" value="From" required />
+                                <InputLabel htmlFor="elementaryDateFrom" value="Year Started" required />
                                 <TextInput
-                                    type="date"
+                                    type="number"
                                     id="elementaryDateFrom"
                                     name="elementaryDateFrom"
-                                    value={formData.elementaryDateFrom}
+                                    value={formData.elementaryDateFrom || ''}
+                                    min="1900"
+                                    max={new Date().getFullYear()}
+                                    placeholder="YYYY"
                                     className={`mt-1 block w-full ${errors.elementaryDateFrom ? 'border-red-500' : ''}`}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => handleInputChange({
+                                        target: {
+                                            name: e.target.name,
+                                            value: parseInt(e.target.value) || ''
+                                        }
+                                    })}
                                 />
                                 {errors.elementaryDateFrom && (
                                     <InputError message={errors.elementaryDateFrom} className="mt-2" />
                                 )}
                             </div>
                             <div>
-                                <InputLabel htmlFor="elementaryDateTo" value="To" required />
+                                <InputLabel htmlFor="elementaryDateTo" value="Year Completed" required />
                                 <TextInput
-                                    type="date"
+                                    type="number"
                                     id="elementaryDateTo"
                                     name="elementaryDateTo"
                                     value={formData.elementaryDateTo}
+                                    min="1900"
+                                    max={new Date().getFullYear()}
+                                    placeholder="YYYY"
                                     className={`mt-1 block w-full ${errors.elementaryDateTo ? 'border-red-500' : ''}`}
                                     onChange={handleInputChange}
                                 />
@@ -245,23 +256,51 @@ export default function EducationStep({
                                             </div>
                                             <div>
                                                 <InputLabel value="Type of School" required />
-                                                <TextInput
+                                                <select
                                                     name="type"
                                                     value={school.type}
                                                     onChange={(e) => handleArrayFieldChange('highSchools', index, 'type', e.target.value)}
-                                                    className="mt-1 block w-full"
-                                                    placeholder="e.g., Middle School, Junior High, Senior High"
-                                                />
+                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                >
+                                                    <option value="">Select Type</option>
+                                                    <option value="Junior High School">Junior High School</option>
+                                                    <option value="Senior High School">Senior High School</option>
+                                                </select>
                                             </div>
+
+                                            {/* Show strand field only for Senior High School */}
+                                            {school.type === 'Senior High School' && (
+                                                <div>
+                                                    <InputLabel value="Strand" required />
+                                                    <select
+                                                        name="strand"
+                                                        value={school.strand}
+                                                        onChange={(e) => handleArrayFieldChange('highSchools', index, 'strand', e.target.value)}
+                                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    >
+                                                        <option value="">Select Strand</option>
+                                                        <option value="STEM">STEM (Science, Technology, Engineering, and Mathematics)</option>
+                                                        <option value="HUMSS">HUMSS (Humanities and Social Sciences)</option>
+                                                        <option value="ABM">ABM (Accountancy, Business, and Management)</option>
+                                                        <option value="GAS">GAS (General Academic Strand)</option>
+                                                        <option value="TVL">TVL (Technical-Vocational-Livelihood)</option>
+                                                        <option value="Sports">Sports Track</option>
+                                                        <option value="Arts and Design">Arts and Design Track</option>
+                                                    </select>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <InputLabel value="From" required />
+                                                <InputLabel value="Year Started" required />
                                                 <TextInput
-                                                    type="date"
+                                                    type="number"
                                                     name="dateFrom"
-                                                    value={school.dateFrom}
-                                                    onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateFrom', e.target.value)}
+                                                    value={school.dateFrom || ''}
+                                                    min="1900"
+                                                    max={new Date().getFullYear()}
+                                                    placeholder="YYYY"
+                                                    onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateFrom', parseInt(e.target.value) || '')}
                                                     className={`mt-1 block w-full ${errors[`highSchools.${index}.dateFrom`] ? 'border-red-500' : ''}`}
                                                 />
                                                 {errors[`highSchools.${index}.dateFrom`] && (
@@ -269,12 +308,15 @@ export default function EducationStep({
                                                 )}
                                             </div>
                                             <div>
-                                                <InputLabel value="To" required />
+                                                <InputLabel value="Year Completed" required />
                                                 <TextInput
-                                                    type="date"
+                                                    type="number"
                                                     name="dateTo"
                                                     value={school.dateTo}
-                                                    onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateTo', e.target.value)}
+                                                    min="1900"
+                                                    max={new Date().getFullYear()}
+                                                    placeholder="YYYY"
+                                                    onChange={(e) => handleArrayFieldChange('highSchools', index, 'dateTo', parseInt(e.target.value) || '')}
                                                     className={`mt-1 block w-full ${errors[`highSchools.${index}.dateTo`] ? 'border-red-500' : ''}`}
                                                 />
                                                 {errors[`highSchools.${index}.dateTo`] && (
@@ -341,7 +383,8 @@ export default function EducationStep({
                                         address: '',
                                         type: '',
                                         dateFrom: '',
-                                        dateTo: ''
+                                        dateTo: '',
+                                        strand: ''
                                     })}
                                 >
                                     Add Another High School
@@ -360,9 +403,17 @@ export default function EducationStep({
                                             id="peptYear"
                                             name="peptYear"
                                             type="number"
-                                            value={formData.peptYear}
+                                            value={formData.peptYear || ''}
+                                            min="1900"
+                                            max={new Date().getFullYear()}
+                                            placeholder="YYYY"
                                             className={`mt-1 block w-full ${errors.peptYear ? 'border-red-500' : ''}`}
-                                            onChange={handleInputChange}
+                                            onChange={(e) => handleInputChange({
+                                                target: {
+                                                    name: e.target.name,
+                                                    value: parseInt(e.target.value) || ''
+                                                }
+                                            })}
                                         />
                                         {errors.peptYear && (
                                             <InputError message={errors.peptYear} className="mt-2" />
@@ -493,11 +544,15 @@ export default function EducationStep({
                                     />
                                 </div>
                                 <div>
-                                    <InputLabel value="School Year(s)" />
+                                    <InputLabel value="School Year" />
                                     <TextInput
-                                        value={education.schoolYear}
+                                        type="number"
+                                        value={education.schoolYear || ''}
+                                        min="1900"
+                                        max={new Date().getFullYear()}
+                                        placeholder="YYYY"
                                         className="mt-1 block w-full"
-                                        onChange={(e) => handleArrayFieldChange('postSecondary', index, 'schoolYear', e.target.value)}
+                                        onChange={(e) => handleArrayFieldChange('postSecondary', index, 'schoolYear', parseInt(e.target.value) || '')}
                                     />
                                 </div>
                             </div>
@@ -631,12 +686,15 @@ export default function EducationStep({
                                 />
                             </div>
                             <div>
-                                <InputLabel value="Date Certified" />
+                                <InputLabel value="Year Certified" />
                                 <TextInput
-                                    type="date"
-                                    value={cert.dateCertified}
+                                    type="number"
+                                    value={cert.dateCertified || ''}
+                                    min="1900"
+                                    max={new Date().getFullYear()}
+                                    placeholder="YYYY"
                                     className="mt-1 block w-full"
-                                    onChange={(e) => handleArrayFieldChange('certifications', index, 'dateCertified', e.target.value)}
+                                    onChange={(e) => handleArrayFieldChange('certifications', index, 'dateCertified', parseInt(e.target.value) || '')}
                                 />
                             </div>
                             <div>
@@ -686,7 +744,8 @@ export default function EducationStep({
                         title: '',
                         agency: '',
                         dateCertified: '',
-                        rating: ''
+                        rating: '',
+                        file: null
                     })}
                 >
                     Add Another Certification

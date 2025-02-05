@@ -18,13 +18,15 @@ return new class extends Migration
             // Common Fields
             $table->string('school_name')->nullable();
             $table->string('address')->nullable();
-            $table->date('date_from')->nullable();
-            $table->date('date_to')->nullable();
+            $table->integer('date_from')->nullable();
+            $table->integer('date_to')->nullable();
             $table->boolean('has_diploma')->default(false);
             $table->string('diploma_file')->nullable();
             
             // High School Specific
             $table->string('school_type')->nullable(); // For high school types
+            $table->boolean('is_senior_high')->default(false);
+            $table->string('strand')->nullable();
             
             // PEPT Specific
             $table->integer('pept_year')->nullable();
@@ -43,7 +45,7 @@ return new class extends Migration
             
             // Certification Specific
             $table->string('agency')->nullable();
-            $table->date('date_certified')->nullable();
+            $table->integer('date_certified')->nullable();
             $table->string('rating')->nullable();
             
             $table->timestamps();

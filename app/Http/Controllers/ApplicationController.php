@@ -124,64 +124,86 @@ class ApplicationController extends Controller
                 case 3: // Education
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
-
-                        // Elementary
-                        'elementarySchool' => 'required|string',
+                        
+                        // Elementary Education
+                        'elementarySchool' => 'required|string|max:255',
                         'elementaryAddress' => 'required|string',
-                        'elementaryDateFrom' => 'required|date',
-                        'elementaryDateTo' => 'required|date|after:elementaryDateFrom',
+                        'elementaryDateFrom' => 'required|integer|min:1900|max:'.(date('Y')),
+                        'elementaryDateTo' => [
+                            'required',
+                            'integer',
+                            'min:1900',
+                            'max:'.(date('Y')),
+                            function ($attribute, $value, $fail) use ($request) {
+                                if ($value < $request->elementaryDateFrom) {
+                                    $fail('The completion year must be after the start year.');
+                                }
+                            }
+                        ],
                         'hasElementaryDiploma' => 'boolean',
-                        'elementaryDiplomaFile' => $request->hasFile('elementaryDiplomaFile') ? 'file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
+                        'elementaryDiplomaFile' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
 
-                        // Secondary Education
+                        // PEPT
                         'hasPEPT' => 'boolean',
+                        'peptYear' => 'nullable|integer|min:1900|max:'.(date('Y')),
+                        'peptGrade' => 'nullable|string',
 
-                        // PEPT fields only required when hasPEPT is true
-                        'peptYear' => 'required_if:hasPEPT,1|nullable|integer',
-                        'peptGrade' => 'required_if:hasPEPT,1|nullable|string',
-
-                        // High School fields only required when hasPEPT is false
+                        // High School
                         'highSchools' => 'required_if:hasPEPT,0|array',
                         'highSchools.*.name' => 'required_if:hasPEPT,0|string',
                         'highSchools.*.address' => 'required_if:hasPEPT,0|string',
-                        'highSchools.*.type' => 'required_if:hasPEPT,0|string',
-                        'highSchools.*.dateFrom' => 'required_if:hasPEPT,0|date',
-                        'highSchools.*.dateTo' => 'required_if:hasPEPT,0|date|after:highSchools.*.dateFrom',
+                        'highSchools.*.type' => 'required_if:hasPEPT,0|string|in:Junior High School,Senior High School',
+                        'highSchools.*.dateFrom' => 'required_if:hasPEPT,0|integer|min:1900|max:'.(date('Y')),
+                        'highSchools.*.dateTo' => [
+                            'required_if:hasPEPT,0',
+                            'integer',
+                            'min:1900',
+                            'max:'.(date('Y')),
+                            function ($attribute, $value, $fail) use ($request) {
+                                $index = explode('.', $attribute)[1];
+                                if ($value < $request->highSchools[$index]['dateFrom']) {
+                                    $fail('The completion year must be after the start year.');
+                                }
+                            }
+                        ],
+                        'highSchools.*.strand' => 'nullable|string|required_if:highSchools.*.type,Senior High School',
 
-                        // Post Secondary
-                        'hasPostSecondaryDiploma' => 'boolean',
-                        'postSecondaryDiplomaFile' => $request->hasFile('postSecondaryDiplomaFile') ? 'file|mimes:pdf,jpg,jpeg,png|max:2048' : 'nullable',
-                        'postSecondary' => 'present|array',
-                        'postSecondary.*.program' => 'required_with:postSecondary|string',
-                        'postSecondary.*.institution' => 'required_with:postSecondary|string',
-                        'postSecondary.*.schoolYear' => 'required_with:postSecondary|string',
+                        // Post Secondary Education - optional
+                        'postSecondary' => 'nullable|array',
+                        'postSecondary.*.program' => 'nullable|string',
+                        'postSecondary.*.institution' => 'nullable|string',
+                        'postSecondary.*.schoolYear' => 'nullable|string',
 
-                        // Non-Formal Education
-                        'nonFormalEducation' => 'present|array',
-                        'nonFormalEducation.*.title' => 'required_with:nonFormalEducation|string',
-                        'nonFormalEducation.*.organization' => 'required_with:nonFormalEducation|string',
-                        'nonFormalEducation.*.date' => 'required_with:nonFormalEducation|date',
-                        'nonFormalEducation.*.certificate' => 'required_with:nonFormalEducation|string',
-                        'nonFormalEducation.*.participation' => 'required_with:nonFormalEducation|string',
+                        // Non-Formal Education - optional
+                        'nonFormalEducation' => 'nullable|array',
+                        'nonFormalEducation.*.title' => 'nullable|string',
+                        'nonFormalEducation.*.organization' => 'nullable|string',
+                        'nonFormalEducation.*.date' => 'nullable|string',
+                        'nonFormalEducation.*.certificate' => 'nullable|string',
+                        'nonFormalEducation.*.participation' => 'nullable|string',
 
-                        // Certifications
-                        'certifications' => 'present|array',
-                        'certifications.*.title' => 'required_with:certifications|string',
-                        'certifications.*.agency' => 'required_with:certifications|string',
-                        'certifications.*.dateCertified' => 'required_with:certifications|date',
-                        'certifications.*.rating' => 'required_with:certifications|string',
+                        // Certifications - optional with integer year
+                        'certifications' => 'nullable|array',
+                        'certifications.*.title' => 'nullable|string',
+                        'certifications.*.agency' => 'nullable|string',
+                        'certifications.*.dateCertified' => [
+                            'nullable',
+                            'integer',
+                            'min:1900',
+                            'max:'.(date('Y'))
+                        ],
+                        'certifications.*.rating' => 'nullable|string',
+                        'certifications.*.file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                     ]);
 
                     // Convert string boolean values to actual booleans
                     $validatedData['hasElementaryDiploma'] = filter_var($request->input('hasElementaryDiploma'), FILTER_VALIDATE_BOOLEAN);
                     $validatedData['hasPEPT'] = filter_var($request->input('hasPEPT'), FILTER_VALIDATE_BOOLEAN);
-                    $validatedData['hasPostSecondaryDiploma'] = filter_var($request->input('hasPostSecondaryDiploma'), FILTER_VALIDATE_BOOLEAN);
 
                     // Handle file uploads with proper error handling
                     $files = [];
                     $fileFields = [
-                        'elementaryDiplomaFile',
-                        'postSecondaryDiplomaFile'
+                        'elementaryDiplomaFile'
                     ];
 
                     foreach ($fileFields as $fileField) {
@@ -206,29 +228,31 @@ class ApplicationController extends Controller
                         'type' => 'elementary',
                         'school_name' => $validatedData['elementarySchool'],
                         'address' => $validatedData['elementaryAddress'],
-                        'date_from' => $validatedData['elementaryDateFrom'],
-                        'date_to' => $validatedData['elementaryDateTo'],
-                        'has_diploma' => $validatedData['hasElementaryDiploma'],
-                        'diploma_file' => $files['elementaryDiplomaFile'] ?? null,
+                        'date_from' => (int)$validatedData['elementaryDateFrom'],
+                        'date_to' => (int)$validatedData['elementaryDateTo'],
+                        'has_diploma' => $validatedData['hasElementaryDiploma'] ?? false,
+                        'diploma_file' => isset($files['elementaryDiplomaFile']) ? $files['elementaryDiplomaFile'] : null,
                     ]);
 
                     // Save High Schools
-                    foreach ($validatedData['highSchools'] as $school) {
-                        Education::create([
-                            'applicant_id' => $request->applicant_id,
-                            'type' => 'high_school',
-                            'school_name' => $school['name'],
-                            'address' => $school['address'],
-                            'school_type' => $school['type'],
-                            'date_from' => $school['dateFrom'],
-                            'date_to' => $school['dateTo'],
-                            'has_diploma' => true,
-                            'diploma_file' => null,
-                        ]);
+                    if (!($validatedData['hasPEPT'] ?? false)) {
+                        foreach ($validatedData['highSchools'] as $school) {
+                            Education::create([
+                                'applicant_id' => $request->applicant_id,
+                                'type' => 'high_school',
+                                'school_name' => $school['name'],
+                                'address' => $school['address'],
+                                'school_type' => $school['type'],
+                                'date_from' => (int)$school['dateFrom'],
+                                'date_to' => (int)$school['dateTo'],
+                                'is_senior_high' => $school['type'] === 'Senior High School',
+                                'strand' => $school['type'] === 'Senior High School' ? $school['strand'] : null,
+                            ]);
+                        }
                     }
 
                     // Save Post Secondary
-                    if (!empty($validatedData['postSecondary'])) {
+                    if (isset($validatedData['postSecondary'])) {
                         foreach ($validatedData['postSecondary'] as $postSecondary) {
                             Education::create([
                                 'applicant_id' => $request->applicant_id,
@@ -236,21 +260,18 @@ class ApplicationController extends Controller
                                 'program' => $postSecondary['program'],
                                 'institution' => $postSecondary['institution'],
                                 'school_year' => $postSecondary['schoolYear'],
-                                'has_diploma' => $validatedData['hasPostSecondaryDiploma'],
-                                'diploma_file' => $files['postSecondaryDiplomaFile'] ?? null,
                             ]);
                         }
                     }
 
                     // Save Non-Formal Education
-                    if (!empty($validatedData['nonFormalEducation'])) {
+                    if (isset($validatedData['nonFormalEducation'])) {
                         foreach ($validatedData['nonFormalEducation'] as $nonFormal) {
                             Education::create([
                                 'applicant_id' => $request->applicant_id,
                                 'type' => 'non_formal',
                                 'title' => $nonFormal['title'],
                                 'organization' => $nonFormal['organization'],
-                                'date_from' => $nonFormal['date'],
                                 'certificate' => $nonFormal['certificate'],
                                 'participation' => $nonFormal['participation'],
                             ]);
@@ -258,17 +279,27 @@ class ApplicationController extends Controller
                     }
 
                     // Save Certifications
-                    if (!empty($validatedData['certifications'])) {
+                    if (isset($validatedData['certifications'])) {
                         foreach ($validatedData['certifications'] as $cert) {
                             Education::create([
                                 'applicant_id' => $request->applicant_id,
                                 'type' => 'certification',
                                 'title' => $cert['title'],
                                 'agency' => $cert['agency'],
-                                'date_certified' => $cert['dateCertified'],
+                                'date_certified' => isset($cert['dateCertified']) ? (int)$cert['dateCertified'] : null,
                                 'rating' => $cert['rating'],
                             ]);
                         }
+                    }
+
+                    // PEPT if applicable
+                    if ($validatedData['hasPEPT'] ?? false) {
+                        Education::create([
+                            'applicant_id' => $request->applicant_id,
+                            'type' => 'pept',
+                            'pept_year' => (int)$validatedData['peptYear'],
+                            'pept_grade' => $validatedData['peptGrade'],
+                        ]);
                     }
 
                     break;
@@ -278,16 +309,14 @@ class ApplicationController extends Controller
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
                         'workExperiences' => 'required|array|min:1',
                         'workExperiences.*.designation' => 'required|string|max:255',
-                        'workExperiences.*.dateFrom' => 'required|date',
-                        'workExperiences.*.dateTo' => 'required|date|after_or_equal:workExperiences.*.dateFrom',
+                        'workExperiences.*.dateFrom' => 'required|integer|min:1900|max:'.(date('Y')),
+                        'workExperiences.*.dateTo' => 'required|integer|min:1900|max:'.(date('Y')),
                         'workExperiences.*.companyName' => 'required|string|max:255',
                         'workExperiences.*.companyAddress' => 'required|string',
                         'workExperiences.*.employmentStatus' => 'required|string|max:255',
                         'workExperiences.*.supervisorName' => 'required|string|max:255',
                         'workExperiences.*.reasonForLeaving' => 'required|string',
                         'workExperiences.*.responsibilities' => 'required|string',
-                        'workExperiences.*.references' => 'required|array|size:3',
-                        'workExperiences.*.references.*' => 'required|string|max:255',
                         'workExperiences.*.documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
                     ]);
 
@@ -319,7 +348,6 @@ class ApplicationController extends Controller
                             'supervisorName' => $experience['supervisorName'],
                             'reasonForLeaving' => $experience['reasonForLeaving'],
                             'responsibilities' => $experience['responsibilities'],
-                            'references' => $experience['references'],
                             'documents' => $documentPath
                         ]);
                     }
