@@ -23,7 +23,6 @@ export default function WorkExperienceStep({
             supervisorName: '',
             reasonForLeaving: '',
             responsibilities: '',
-            references: ['', '', ''],
             documents: null
         });
     }
@@ -104,24 +103,40 @@ export default function WorkExperienceStep({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <InputLabel value="Start Date" required />
+                            <InputLabel value="Year Started" required />
                             <TextInput
-                                type="date"
+                                type="number"
                                 name="dateFrom"
-                                value={experience.dateFrom}
-                                onChange={(e) => handleArrayFieldChange('workExperiences', index, 'dateFrom', e.target.value)}
+                                min="1900"
+                                max={new Date().getFullYear()}
+                                placeholder="YYYY"
+                                value={experience.dateFrom || ''}
+                                onChange={(e) => handleArrayFieldChange(
+                                    'workExperiences', 
+                                    index, 
+                                    'dateFrom', 
+                                    parseInt(e.target.value) || ''
+                                )}
                                 className={`mt-1 block w-full ${errors[`workExperiences.${index}.dateFrom`] ? 'border-red-500' : ''}`}
                             />
                             <InputError message={errors[`workExperiences.${index}.dateFrom`]} />
                         </div>
 
                         <div>
-                            <InputLabel value="End Date" required />
+                            <InputLabel value="Year Ended" required />
                             <TextInput
-                                type="date"
+                                type="number"
                                 name="dateTo"
-                                value={experience.dateTo}
-                                onChange={(e) => handleArrayFieldChange('workExperiences', index, 'dateTo', e.target.value)}
+                                min="1900"
+                                max={new Date().getFullYear()}
+                                placeholder="YYYY"
+                                value={experience.dateTo || ''}
+                                onChange={(e) => handleArrayFieldChange(
+                                    'workExperiences', 
+                                    index, 
+                                    'dateTo', 
+                                    parseInt(e.target.value) || ''
+                                )}
                                 className={`mt-1 block w-full ${errors[`workExperiences.${index}.dateTo`] ? 'border-red-500' : ''}`}
                             />
                             <InputError message={errors[`workExperiences.${index}.dateTo`]} />
@@ -172,25 +187,7 @@ export default function WorkExperienceStep({
                         <InputError message={errors[`workExperiences.${index}.responsibilities`]} />
                     </div>
 
-                    <div>
-                        <InputLabel value="References (3 persons)" required />
-                        {[0, 1, 2].map((refIndex) => (
-                            <TextInput
-                                key={refIndex}
-                                name={`references.${refIndex}`}
-                                value={experience.references[refIndex] || ''}
-                                onChange={(e) => {
-                                    const newRefs = [...experience.references];
-                                    newRefs[refIndex] = e.target.value;
-                                    handleArrayFieldChange('workExperiences', index, 'references', newRefs);
-                                }}
-                                className="mt-1 block w-full"
-                                placeholder={`Reference Person ${refIndex + 1}`}
-                            />
-                        ))}
-                        <InputError message={errors[`workExperiences.${index}.references`]} />
-                    </div>
-
+                    
                     <div className="space-y-2">
                         <InputLabel value="Supporting Documents" />
                         <input

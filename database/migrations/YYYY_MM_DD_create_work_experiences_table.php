@@ -13,15 +13,14 @@ return new class extends Migration
             $table->string('applicant_id');
             $table->foreign('applicant_id')->references('applicant_id')->on('personal_infos')->onDelete('cascade');
             $table->string('designation');
-            $table->date('dateFrom');
-            $table->date('dateTo');
+            $table->integer('dateFrom')->nullable();
+            $table->integer('dateTo')->nullable();
             $table->string('companyName');
             $table->text('companyAddress');
             $table->string('employmentStatus');
             $table->string('supervisorName');
             $table->text('reasonForLeaving');
             $table->text('responsibilities');
-            $table->json('references'); // Stores array of 3 reference persons
             $table->string('documents')->nullable();
             $table->timestamps();
         });

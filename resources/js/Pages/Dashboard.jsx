@@ -304,70 +304,66 @@ export default function MultiStepForm() {
 
             case 3: // Education
                 const educationFormData = new FormData();
-                
-                // Convert boolean values to '1' or '0' strings for PHP
-                educationFormData.append('hasElementaryDiploma', formData.hasElementaryDiploma ? '1' : '0');
-                educationFormData.append('hasPEPT', formData.hasPEPT ? '1' : '0');
-                educationFormData.append('hasPostSecondaryDiploma', formData.hasPostSecondaryDiploma ? '1' : '0');
-                
-                // Append basic fields
                 educationFormData.append('applicant_id', formData.applicant_id);
                 
-                // Elementary
+                // Elementary Education - Parse years as integers
                 educationFormData.append('elementarySchool', formData.elementarySchool);
                 educationFormData.append('elementaryAddress', formData.elementaryAddress);
-                educationFormData.append('elementaryDateFrom', formData.elementaryDateFrom);
-                educationFormData.append('elementaryDateTo', formData.elementaryDateTo);
+                educationFormData.append('elementaryDateFrom', parseInt(formData.elementaryDateFrom) || '');
+                educationFormData.append('elementaryDateTo', parseInt(formData.elementaryDateTo) || '');
+                educationFormData.append('hasElementaryDiploma', formData.hasElementaryDiploma ? '1' : '0');
                 
-                // Append elementary diploma file if exists
                 if (formData.elementaryDiplomaFile instanceof File) {
                     educationFormData.append('elementaryDiplomaFile', formData.elementaryDiplomaFile);
                 }
 
-                // Secondary Education Type
-                educationFormData.append('secondaryEducationType', formData.secondaryEducationType);
+                // Secondary Education
+                educationFormData.append('hasPEPT', formData.hasPEPT ? '1' : '0');
                 
                 if (formData.hasPEPT) {
-                    // PEPT
-                    educationFormData.append('peptYear', formData.peptYear);
+                    educationFormData.append('peptYear', parseInt(formData.peptYear) || '');
                     educationFormData.append('peptGrade', formData.peptGrade);
                 } else {
-                    // High Schools
+                    // High Schools array
                     formData.highSchools.forEach((school, index) => {
                         educationFormData.append(`highSchools[${index}][name]`, school.name);
                         educationFormData.append(`highSchools[${index}][address]`, school.address);
                         educationFormData.append(`highSchools[${index}][type]`, school.type);
-                        educationFormData.append(`highSchools[${index}][dateFrom]`, school.dateFrom);
-                        educationFormData.append(`highSchools[${index}][dateTo]`, school.dateTo);
+                        educationFormData.append(`highSchools[${index}][dateFrom]`, parseInt(school.dateFrom) || '');
+                        educationFormData.append(`highSchools[${index}][dateTo]`, parseInt(school.dateTo) || '');
+                        
+                        if (school.type === 'Senior High School') {
+                            educationFormData.append(`highSchools[${index}][strand]`, school.strand);
+                        }
                     });
                 }
 
-                // Post Secondary
-                if (formData.hasPostSecondaryDiploma) {
-                    educationFormData.append('postSecondaryDiplomaFile', formData.postSecondaryDiplomaFile);
-                }
-                
-                formData.postSecondary.forEach((edu, index) => {
-                    educationFormData.append(`postSecondary[${index}][program]`, edu.program);
-                    educationFormData.append(`postSecondary[${index}][institution]`, edu.institution);
-                    educationFormData.append(`postSecondary[${index}][schoolYear]`, edu.schoolYear);
+                // Post Secondary Education
+                formData.postSecondary.forEach((education, index) => {
+                    educationFormData.append(`postSecondary[${index}][program]`, education.program);
+                    educationFormData.append(`postSecondary[${index}][institution]`, education.institution);
+                    educationFormData.append(`postSecondary[${index}][schoolYear]`, education.schoolYear);
                 });
 
                 // Non-Formal Education
-                formData.nonFormalEducation.forEach((edu, index) => {
-                    educationFormData.append(`nonFormalEducation[${index}][title]`, edu.title);
-                    educationFormData.append(`nonFormalEducation[${index}][organization]`, edu.organization);
-                    educationFormData.append(`nonFormalEducation[${index}][date]`, edu.date);
-                    educationFormData.append(`nonFormalEducation[${index}][certificate]`, edu.certificate);
-                    educationFormData.append(`nonFormalEducation[${index}][participation]`, edu.participation);
+                formData.nonFormalEducation.forEach((education, index) => {
+                    educationFormData.append(`nonFormalEducation[${index}][title]`, education.title);
+                    educationFormData.append(`nonFormalEducation[${index}][organization]`, education.organization);
+                    educationFormData.append(`nonFormalEducation[${index}][date]`, education.date);
+                    educationFormData.append(`nonFormalEducation[${index}][certificate]`, education.certificate);
+                    educationFormData.append(`nonFormalEducation[${index}][participation]`, education.participation);
                 });
 
                 // Certifications
                 formData.certifications.forEach((cert, index) => {
                     educationFormData.append(`certifications[${index}][title]`, cert.title);
                     educationFormData.append(`certifications[${index}][agency]`, cert.agency);
-                    educationFormData.append(`certifications[${index}][dateCertified]`, cert.dateCertified);
+                    educationFormData.append(`certifications[${index}][dateCertified]`, parseInt(cert.dateCertified) || '');
                     educationFormData.append(`certifications[${index}][rating]`, cert.rating);
+                    
+                    if (cert.file instanceof File) {
+                        educationFormData.append(`certifications[${index}][file]`, cert.file);
+                    }
                 });
 
                 return educationFormData;
@@ -380,19 +376,14 @@ export default function MultiStepForm() {
                 formData.workExperiences.forEach((exp, index) => {
                     if (exp.designation || exp.companyName) {
                         workExperienceFormData.append(`workExperiences[${index}][designation]`, exp.designation);
-                        workExperienceFormData.append(`workExperiences[${index}][dateFrom]`, exp.dateFrom);
-                        workExperienceFormData.append(`workExperiences[${index}][dateTo]`, exp.dateTo);
+                        workExperienceFormData.append(`workExperiences[${index}][dateFrom]`, parseInt(exp.dateFrom) || '');  // Parse as integer
+                        workExperienceFormData.append(`workExperiences[${index}][dateTo]`, parseInt(exp.dateTo) || '');      // Parse as integer
                         workExperienceFormData.append(`workExperiences[${index}][companyName]`, exp.companyName);
                         workExperienceFormData.append(`workExperiences[${index}][companyAddress]`, exp.companyAddress);
                         workExperienceFormData.append(`workExperiences[${index}][employmentStatus]`, exp.employmentStatus);
                         workExperienceFormData.append(`workExperiences[${index}][supervisorName]`, exp.supervisorName);
                         workExperienceFormData.append(`workExperiences[${index}][reasonForLeaving]`, exp.reasonForLeaving);
                         workExperienceFormData.append(`workExperiences[${index}][responsibilities]`, exp.responsibilities);
-                        
-                        // Handle references array
-                        exp.references.forEach((ref, refIndex) => {
-                            workExperienceFormData.append(`workExperiences[${index}][references][${refIndex}]`, ref);
-                        });
                         
                         // Handle document file if it exists
                         if (exp.documents instanceof File) {

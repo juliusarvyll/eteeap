@@ -11,14 +11,15 @@ class CommunityAward extends Model
         'applicant_id',
         'title',
         'organization',
-        'dateAwarded',
+        'dateAwarded',  
         'description',
         'document'
     ];
 
     protected $casts = [
-        'dateAwarded' => 'date'
+        'dateAwarded' => 'integer'
     ];
+
 
     public function personalInfo(): BelongsTo
     {
