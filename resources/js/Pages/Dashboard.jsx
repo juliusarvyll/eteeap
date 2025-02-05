@@ -38,7 +38,7 @@ export default function MultiStepForm() {
         middleName: '',
         suffix: '',
         birthDate: '',
-        placeOfBirth: '',  
+        placeOfBirth: '',
         civilStatus: '',
         sex: '',
         languages: '',
@@ -48,8 +48,8 @@ export default function MultiStepForm() {
         zipCode: '',
         phoneNumber: '',
         nationality: '',
-        
-        
+
+
         // Step 2 - Learning Objectives
         firstPriority: '',
         secondPriority: '',
@@ -68,12 +68,12 @@ export default function MultiStepForm() {
         elementaryDateTo: '',
         hasElementaryDiploma: false,
         elementaryDiplomaFile: null,
-        
+
         secondaryEducationType: 'regular',
         hasPEPT: false,
         peptYear: '',
         peptGrade: '',
-        
+
         highSchools: [{
             name: '',
             address: '',
@@ -81,7 +81,7 @@ export default function MultiStepForm() {
             dateFrom: '',
             dateTo: ''
         }],
-        
+
         hasPostSecondaryDiploma: false,
         postSecondaryDiplomaFile: null,
         postSecondary: [{
@@ -89,7 +89,7 @@ export default function MultiStepForm() {
             institution: '',
             schoolYear: ''
         }],
-        
+
         nonFormalEducation: [{
             title: '',
             organization: '',
@@ -97,7 +97,7 @@ export default function MultiStepForm() {
             certificate: '',
             participation: ''
         }],
-        
+
         certifications: [{
             title: '',
             agency: '',
@@ -163,7 +163,7 @@ export default function MultiStepForm() {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        
+
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
@@ -190,7 +190,7 @@ export default function MultiStepForm() {
     const handleArrayFieldChange = (arrayName, index, field, value) => {
         setFormData(prev => ({
             ...prev,
-            [arrayName]: prev[arrayName].map((item, i) => 
+            [arrayName]: prev[arrayName].map((item, i) =>
                 i === index ? { ...item, [field]: value } : item
             )
         }));
@@ -212,24 +212,24 @@ export default function MultiStepForm() {
 
     const handleNext = async () => {
         const stepData = getStepData(currentStep);
-        
+
         setLoading(true);
         try {
             // Add proper headers for FormData
             const config = {
                 headers: {
-                    'Content-Type': (currentStep === 1 || currentStep === 3 || currentStep === 4 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8) 
-                        ? 'multipart/form-data' 
+                    'Content-Type': (currentStep === 1 || currentStep === 3 || currentStep === 4 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8)
+                        ? 'multipart/form-data'
                         : 'application/json',
                 },
             };
 
             const response = await axios.post(
-                `/application/step/${currentStep}`, 
+                `/application/step/${currentStep}`,
                 stepData,
                 config
             );
-            
+
             if (currentStep === 1 && response.data.data?.applicant_id) {
                 setFormData(prev => ({
                     ...prev,
@@ -276,16 +276,16 @@ export default function MultiStepForm() {
                 formDataObj.append('phoneNumber', formData.phoneNumber);
                 formDataObj.append('email', formData.email);
                 formDataObj.append('nationality', formData.nationality);
-                
+
                 // Only append document if it exists and is a file
                 if (formData.document instanceof File) {
                     formDataObj.append('document', formData.document);
                 }
-                
+
                 if (formData.applicant_id) {
                     formDataObj.append('applicant_id', formData.applicant_id);
                 }
-                
+
                 return formDataObj;
 
             case 2: // Learning Objectives
@@ -304,21 +304,21 @@ export default function MultiStepForm() {
 
             case 3: // Education
                 const educationFormData = new FormData();
-                
+
                 // Convert boolean values to '1' or '0' strings for PHP
                 educationFormData.append('hasElementaryDiploma', formData.hasElementaryDiploma ? '1' : '0');
                 educationFormData.append('hasPEPT', formData.hasPEPT ? '1' : '0');
                 educationFormData.append('hasPostSecondaryDiploma', formData.hasPostSecondaryDiploma ? '1' : '0');
-                
+
                 // Append basic fields
                 educationFormData.append('applicant_id', formData.applicant_id);
-                
+
                 // Elementary
                 educationFormData.append('elementarySchool', formData.elementarySchool);
                 educationFormData.append('elementaryAddress', formData.elementaryAddress);
                 educationFormData.append('elementaryDateFrom', formData.elementaryDateFrom);
                 educationFormData.append('elementaryDateTo', formData.elementaryDateTo);
-                
+
                 // Append elementary diploma file if exists
                 if (formData.elementaryDiplomaFile instanceof File) {
                     educationFormData.append('elementaryDiplomaFile', formData.elementaryDiplomaFile);
@@ -326,7 +326,7 @@ export default function MultiStepForm() {
 
                 // Secondary Education Type
                 educationFormData.append('secondaryEducationType', formData.secondaryEducationType);
-                
+
                 if (formData.hasPEPT) {
                     // PEPT
                     educationFormData.append('peptYear', formData.peptYear);
@@ -346,7 +346,7 @@ export default function MultiStepForm() {
                 if (formData.hasPostSecondaryDiploma) {
                     educationFormData.append('postSecondaryDiplomaFile', formData.postSecondaryDiplomaFile);
                 }
-                
+
                 formData.postSecondary.forEach((edu, index) => {
                     educationFormData.append(`postSecondary[${index}][program]`, edu.program);
                     educationFormData.append(`postSecondary[${index}][institution]`, edu.institution);
@@ -375,7 +375,7 @@ export default function MultiStepForm() {
             case 4: // Work Experience
                 const workExperienceFormData = new FormData();
                 workExperienceFormData.append('applicant_id', formData.applicant_id);
-                
+
                 // Append each work experience as a separate entry
                 formData.workExperiences.forEach((exp, index) => {
                     if (exp.designation || exp.companyName) {
@@ -388,12 +388,12 @@ export default function MultiStepForm() {
                         workExperienceFormData.append(`workExperiences[${index}][supervisorName]`, exp.supervisorName);
                         workExperienceFormData.append(`workExperiences[${index}][reasonForLeaving]`, exp.reasonForLeaving);
                         workExperienceFormData.append(`workExperiences[${index}][responsibilities]`, exp.responsibilities);
-                        
+
                         // Handle references array
                         exp.references.forEach((ref, refIndex) => {
                             workExperienceFormData.append(`workExperiences[${index}][references][${refIndex}]`, ref);
                         });
-                        
+
                         // Handle document file if it exists
                         if (exp.documents instanceof File) {
                             workExperienceFormData.append(`workExperiences[${index}][documents]`, exp.documents);
@@ -414,7 +414,7 @@ export default function MultiStepForm() {
                         awardsFormData.append(`academicAwards[${index}][institution]`, award.institution);
                         awardsFormData.append(`academicAwards[${index}][dateReceived]`, award.dateReceived);
                         awardsFormData.append(`academicAwards[${index}][description]`, award.description);
-                        
+
                         // Handle document file if exists
                         if (award.document instanceof File) {
                             awardsFormData.append(`academicAwards[${index}][document]`, award.document);
@@ -445,7 +445,7 @@ export default function MultiStepForm() {
             case 6: // Creative Works
                 const creativeWorksFormData = new FormData();
                 creativeWorksFormData.append('applicant_id', formData.applicant_id);
-                
+
                 // Append each creative work as a separate entry
                 formData.creativeWorks.forEach((work, index) => {
                     creativeWorksFormData.append(`creativeWorks[${index}][title]`, work.title);
@@ -460,7 +460,7 @@ export default function MultiStepForm() {
             case 7: // Lifelong Learning
                 const lifelongLearningFormData = new FormData();
                 lifelongLearningFormData.append('applicant_id', formData.applicant_id);
-                
+
                 // Hobbies
                 formData.hobbies.forEach((hobby, index) => {
                     lifelongLearningFormData.append(`hobbies[${index}][description]`, hobby.description);
@@ -521,7 +521,7 @@ export default function MultiStepForm() {
                     applicant_id: formData.applicant_id,
                     status: 'pending'
                 });
-                
+
                 setFormData(prev => ({ ...prev, status: 'pending' }));
                 setCurrentStep(STEPS.length + 1);
             }
@@ -570,7 +570,7 @@ export default function MultiStepForm() {
         // You might get this from props or an API call
         setFormData(prevState => ({
             ...prevState,
-            
+
         }));
     }, []);
 
@@ -581,64 +581,64 @@ export default function MultiStepForm() {
 
         switch (currentStep) {
             case 1:
-                return <PersonalInfoStep 
-                    formData={formData} 
-                    errors={errors} 
-                    handleInputChange={handleInputChange} 
+                return <PersonalInfoStep
+                    formData={formData}
+                    errors={errors}
+                    handleInputChange={handleInputChange}
                 />;
             case 2:
-                return <LearningObjectivesStep 
-                    formData={formData} 
-                    errors={errors} 
-                    handleInputChange={handleInputChange} 
+                return <LearningObjectivesStep
+                    formData={formData}
+                    errors={errors}
+                    handleInputChange={handleInputChange}
                 />;
             case 3:
-                return <EducationStep 
-                    formData={formData} 
-                    errors={errors} 
+                return <EducationStep
+                    formData={formData}
+                    errors={errors}
                     handleInputChange={handleInputChange}
                     handleArrayFieldChange={handleArrayFieldChange}
                     addArrayItem={addArrayItem}
                     removeArrayItem={removeArrayItem}
                 />;
             case 4:
-                return <WorkExperienceStep 
-                    formData={formData} 
-                    errors={errors} 
+                return <WorkExperienceStep
+                    formData={formData}
+                    errors={errors}
                     handleInputChange={handleInputChange}
                     handleArrayFieldChange={handleArrayFieldChange}
                     addArrayItem={addArrayItem}
                     removeArrayItem={removeArrayItem}
                 />;
             case 5:
-                return <HonorsAwardsStep 
-                    formData={formData} 
-                    errors={errors} 
+                return <HonorsAwardsStep
+                    formData={formData}
+                    errors={errors}
                     handleArrayFieldChange={handleArrayFieldChange}
                     addArrayItem={addArrayItem}
                     removeArrayItem={removeArrayItem}
                 />;
             case 6:
-                return <CreativeWorksStep 
-                    formData={formData} 
-                    errors={errors} 
+                return <CreativeWorksStep
+                    formData={formData}
+                    errors={errors}
                     handleArrayFieldChange={handleArrayFieldChange}
                     addArrayItem={addArrayItem}
                     removeArrayItem={removeArrayItem}
                 />;
             case 7:
-                return <LifelongLearningStep 
-                    formData={formData} 
-                    errors={errors} 
+                return <LifelongLearningStep
+                    formData={formData}
+                    errors={errors}
                     handleInputChange={handleInputChange}
                     handleArrayFieldChange={handleArrayFieldChange}
                     addArrayItem={addArrayItem}
                     removeArrayItem={removeArrayItem}
                 />;
             case 8:
-                return <EssayStep 
-                    formData={formData} 
-                    errors={errors} 
+                return <EssayStep
+                    formData={formData}
+                    errors={errors}
                     handleInputChange={handleInputChange}
                     onSubmit={handleSubmit}
                 />;
@@ -660,7 +660,7 @@ export default function MultiStepForm() {
                                     <h2 className={`mb-6 text-xl font-semibold leading-tight text-gray-800 ${currentStep === 8 ? 'hidden' : ''}`}>
                                         ETEEAP Admission Form
                                     </h2>
-                                    
+
                                     {/* Updated Progress Bar */}
                                     <div className={`mb-8 ${currentStep === 8 ? 'hidden' : ''}`}>
                                         <div className="flex flex-wrap justify-between gap-2">
@@ -671,7 +671,7 @@ export default function MultiStepForm() {
                                                 >
                                                     <div
                                                         className={`
-                                                            flex h-8 w-8 items-center justify-center rounded-full 
+                                                            flex h-8 w-8 items-center justify-center rounded-full
                                                             ${step.number <= currentStep
                                                                 ? 'bg-indigo-600 text-white'
                                                                 : 'bg-gray-200 text-gray-600'
@@ -680,7 +680,7 @@ export default function MultiStepForm() {
                                                     >
                                                         {step.number}
                                                     </div>
-                                                    <span 
+                                                    <span
                                                         className={`
                                                             text-xs text-center whitespace-nowrap
                                                             ${step.number <= currentStep
@@ -698,7 +698,7 @@ export default function MultiStepForm() {
                                         <div className="mt-4 hidden md:block">
                                             <div className="relative">
                                                 <div className="absolute left-0 top-1/2 h-0.5 w-full bg-gray-200"></div>
-                                                <div 
+                                                <div
                                                     className="absolute left-0 top-1/2 h-0.5 bg-indigo-600 transition-all duration-300"
                                                     style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
                                                 ></div>
@@ -718,7 +718,7 @@ export default function MultiStepForm() {
                                                     Previous
                                                 </SecondaryButton>
                                             )}
-                                            
+
                                             <div className="ml-auto">
                                                 {currentStep < STEPS.length ? (
                                                     <PrimaryButton

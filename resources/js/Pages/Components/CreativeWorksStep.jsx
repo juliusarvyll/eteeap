@@ -4,12 +4,12 @@ import TextInput from '@/Components/TextInput';
 import TextArea from '@/Components/TextArea';
 import PrimaryButton from '@/Components/PrimaryButton';
 
-export default function CreativeWorksStep({ 
-    formData, 
-    errors, 
+export default function CreativeWorksStep({
+    formData,
+    errors,
     handleArrayFieldChange,
     addArrayItem,
-    removeArrayItem 
+    removeArrayItem
 }) {
 
 
@@ -18,13 +18,13 @@ export default function CreativeWorksStep({
             <div>
                 <h2 className="text-xl font-bold mb-4">V. CREATIVE WORKS AND SPECIAL ACCOMPLISHMENTS</h2>
                 <p className="text-sm text-gray-600 mb-6">
-                    In this section, enumerate the various creative works you have accomplished and other special accomplishments. 
-                    Examples include inventions, published and unpublished literary works, musical work, visual and performing arts, 
+                    In this section, enumerate the various creative works you have accomplished and other special accomplishments.
+                    Examples include inventions, published and unpublished literary works, musical work, visual and performing arts,
                     exceptional sports achievements, social, cultural and leisure activities, etc.
                 </p>
                 <p className="text-sm text-gray-600 mb-6">
-                    Please provide a detailed description of your work/accomplishments and explain why it qualifies as special. 
-                    For example, cooking regular meals will not qualify; however, demonstrating expertise in preparing regional 
+                    Please provide a detailed description of your work/accomplishments and explain why it qualifies as special.
+                    For example, cooking regular meals will not qualify; however, demonstrating expertise in preparing regional
                     delicacies shows sophisticated understanding of cultural cuisine.
                 </p>
             </div>
@@ -33,8 +33,8 @@ export default function CreativeWorksStep({
                 <div key={index} className="border p-6 rounded-lg space-y-6 bg-white shadow-sm">
                     {/* Title of Work/Accomplishment */}
                     <div>
-                        <InputLabel 
-                            value="Title or Name of Work/Accomplishment" 
+                        <InputLabel
+                            value="Title or Name of Work/Accomplishment"
                             className="font-semibold"
                         />
                         <TextInput
@@ -47,8 +47,8 @@ export default function CreativeWorksStep({
 
                     {/* Description */}
                     <div>
-                        <InputLabel 
-                            value="Detailed Description" 
+                        <InputLabel
+                            value="Detailed Description"
                             className="font-semibold"
                         />
                         <TextArea
@@ -63,8 +63,8 @@ export default function CreativeWorksStep({
 
                     {/* Significance */}
                     <div>
-                        <InputLabel 
-                            value="Why is this a Special Accomplishment?" 
+                        <InputLabel
+                            value="Why is this a Special Accomplishment?"
                             className="font-semibold"
                         />
                         <TextArea
@@ -79,8 +79,8 @@ export default function CreativeWorksStep({
 
                     {/* Date Completed */}
                     <div>
-                        <InputLabel 
-                            value="Date Completed" 
+                        <InputLabel
+                            value="Date Completed"
                             className="font-semibold"
                         />
                         <TextInput
@@ -94,8 +94,8 @@ export default function CreativeWorksStep({
 
                     {/* Corroborating Institution */}
                     <div>
-                        <InputLabel 
-                            value="Corroborating Institution or Body" 
+                        <InputLabel
+                            value="Corroborating Institution or Body"
                             className="font-semibold"
                         />
                         <TextInput
@@ -139,4 +139,4 @@ export default function CreativeWorksStep({
             </div>
         </div>
     );
-} 
+}

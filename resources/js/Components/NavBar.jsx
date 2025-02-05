@@ -14,14 +14,8 @@ export default function NavBar() {
                     <h1 className="text-lg font-bold font-old">St. Paul University Philippines</h1>
                 </Link>
                 <nav className="flex space-x-6">
-                    <Link 
-                        href="/dashboard" 
-                        className="hover:text-green-200 transition-colors"
-                    >
-                        Dashboard
-                    </Link>
-                    <Link 
-                        href="/track-application" 
+                    <Link
+                        href="/track-application"
                         className="hover:text-green-200 transition-colors"
                     >
                         Track Application
@@ -30,4 +24,4 @@ export default function NavBar() {
             </div>
         </div>
     );
-} 
+}

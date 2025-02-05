@@ -32,4 +32,4 @@ Route::prefix('application')->group(function () {
 // Auth check route
 Route::get('/auth-check', function () {
     return response()->json(['authenticated' => true]);
-}); 
+});

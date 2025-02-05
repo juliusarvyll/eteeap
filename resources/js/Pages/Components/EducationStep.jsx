@@ -163,7 +163,7 @@ export default function EducationStep({
                                 />
                                 <span>Regular High School</span>
                             </label>
-                            
+
                             <label className="flex items-center space-x-2">
                                 <input
                                     type="radio"

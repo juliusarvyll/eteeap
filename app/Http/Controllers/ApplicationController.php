@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewApplicationSubmitted;
+use App\Notifications\ApplicationSubmitted;
 use App\Models\User;
 use App\Jobs\SendApplicationNotifications;
 use App\Events\ApplicantNotification;
@@ -72,10 +72,31 @@ class ApplicationController extends Controller
                         $validatedData['document'] = $path;
                     }
 
+                    // Check if this is a new application
+                    $isNewApplication = !$request->has('applicant_id');
+
                     $personalInfo = PersonalInfo::updateOrCreate(
                         ['applicant_id' => $request->applicant_id ?? $this->generateApplicantId()],
                         $validatedData
                     );
+
+                    // Send notification to admins if this is a new application
+                    if ($isNewApplication) {
+                        $admins = User::all();
+                        \Log::info('Sending new application notification', [
+                            'applicant_id' => $personalInfo->applicant_id,
+                            'admins_count' => $admins->count(),
+                            'admins' => $admins->pluck('email')->toArray()
+                        ]);
+
+                        Notification::send($admins, new ApplicationSubmitted(
+                            "{$personalInfo->firstName} {$personalInfo->lastName}",
+                            $personalInfo->applicant_id,
+                            'started'
+                        ));
+
+                        \Log::info('Notification sent successfully');
+                    }
 
                     $response = ['applicant_id' => $personalInfo->applicant_id];
                     break;
@@ -103,7 +124,7 @@ class ApplicationController extends Controller
                 case 3: // Education
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
-                        
+
                         // Elementary
                         'elementarySchool' => 'required|string',
                         'elementaryAddress' => 'required|string',
@@ -114,7 +135,7 @@ class ApplicationController extends Controller
 
                         // Secondary Education
                         'hasPEPT' => 'boolean',
-                        
+
                         // PEPT fields only required when hasPEPT is true
                         'peptYear' => 'required_if:hasPEPT,1|nullable|integer',
                         'peptGrade' => 'required_if:hasPEPT,1|nullable|string',
@@ -307,7 +328,7 @@ class ApplicationController extends Controller
                 case 5: // Honors and Awards
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
-                        
+
                         // Academic Awards
                         'academicAwards' => 'present|array',
                         'academicAwards.*.title' => 'required|string',
@@ -315,13 +336,13 @@ class ApplicationController extends Controller
                         'academicAwards.*.dateReceived' => 'required|date',
                         'academicAwards.*.description' => 'required|string',
                         'academicAwards.*.document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-                        
+
                         // Community Awards
                         'communityAwards' => 'present|array',
                         'communityAwards.*.title' => 'required|string',
                         'communityAwards.*.organization' => 'required|string',
                         'communityAwards.*.dateAwarded' => 'required|date',
-                        
+
                         // Work Awards
                         'workAwards' => 'present|array',
                         'workAwards.*.title' => 'required|string',
@@ -332,7 +353,7 @@ class ApplicationController extends Controller
                     // Handle Academic Awards
                     if ($request->has('academicAwards')) {
                         AcademicAward::where('applicant_id', $request->applicant_id)->delete();
-                        
+
                         foreach ($request->academicAwards as $award) {
                             // Debug log
                             \Log::info('Creating academic award with data:', [
@@ -359,7 +380,7 @@ class ApplicationController extends Controller
                                 \Log::info('Final award data for creation:', $awardData);
 
                                 $createdAward = AcademicAward::create($awardData);
-                                
+
                                 // Debug log success
                                 \Log::info('Successfully created award:', ['award_id' => $createdAward->id]);
 
@@ -512,18 +533,18 @@ class ApplicationController extends Controller
                         ['applicant_id' => $request->applicant_id],
                         ['content' => $validatedData['essay']]
                     );
-                    
-                    // Get the application instance
-                    $application = PersonalInfo::where('applicant_id', $request->applicant_id)->firstOrFail();
-                    $application->update(['status' => 'pending']);
 
-                    // Dispatch the event instead of sending notification directly
-                    event(new ApplicantNotification($application));
+                    // Get the application and update status
+                    $personalInfo = PersonalInfo::where('applicant_id', $request->applicant_id)->firstOrFail();
+                    $personalInfo->update(['status' => 'pending']);
 
-                    \Log::info('Application submitted notifications queued', [
-                        'applicant_id' => $request->applicant_id,
-                        'timestamp' => now()
-                    ]);
+                    // Send notification to admin users
+                    $admins = User::all();
+                    Notification::send($admins, new ApplicationSubmitted(
+                        "{$personalInfo->firstName} {$personalInfo->lastName}",
+                        $personalInfo->applicant_id
+                    ));
+
                     break;
             }
 
@@ -558,13 +579,17 @@ class ApplicationController extends Controller
     public function finalizeApplication(Request $request)
     {
         try {
-            $application = PersonalInfo::where('applicant_id', $request->applicant_id);
+            $personalInfo = PersonalInfo::where('applicant_id', $request->applicant_id)->firstOrFail();
 
-            DB::transaction(function () use ($application) {
-                $application->update(['status' => 'pending']);
-                
-                // Send notifications directly to admins
-                
+            DB::transaction(function () use ($personalInfo) {
+                $personalInfo->update(['status' => 'pending']);
+
+                // Send notification to all admin users
+                $admins = User::all();
+                Notification::send($admins, new ApplicationSubmitted(
+                    "{$personalInfo->firstName} {$personalInfo->lastName}",
+                    $personalInfo->applicant_id
+                ));
             });
 
             return response()->json([
@@ -644,7 +669,7 @@ class ApplicationController extends Controller
                 'status' => 'error',
                 'message' => 'Invalid Application ID'
             ], 422);
-            
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'status' => 'error',
