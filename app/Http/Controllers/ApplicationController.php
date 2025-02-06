@@ -105,8 +105,8 @@ class ApplicationController extends Controller
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
                         'firstPriority' => 'required|string',
-                        'secondPriority' => 'nullable|string',
-                        'thirdPriority' => 'nullable|string',
+                        'secondPriority' => 'required|string',
+                        'thirdPriority' => 'required|string',
                         'goalStatement' => 'required|string',
                         'timeCommitment' => 'required|string',
                         'overseasPlan' => 'nullable|string',
@@ -307,49 +307,60 @@ class ApplicationController extends Controller
                 case 4: // Work Experience
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
-                        'workExperiences' => 'required|array|min:1',
-                        'workExperiences.*.designation' => 'required|string|max:255',
-                        'workExperiences.*.dateFrom' => 'required|integer|min:1900|max:'.(date('Y')),
-                        'workExperiences.*.dateTo' => 'required|integer|min:1900|max:'.(date('Y')),
-                        'workExperiences.*.companyName' => 'required|string|max:255',
-                        'workExperiences.*.companyAddress' => 'required|string',
-                        'workExperiences.*.employmentStatus' => 'required|string|max:255',
-                        'workExperiences.*.supervisorName' => 'required|string|max:255',
-                        'workExperiences.*.reasonForLeaving' => 'required|string',
-                        'workExperiences.*.responsibilities' => 'required|string',
+                        'employment_type' => 'required|in:employed,self_employed,no_employment',
+                        'workExperiences' => 'required_if:employment_type,employed,self_employed|array',
+                        'workExperiences.*.designation' => 'required_if:employment_type,employed,self_employed|string|max:255',
+                        'workExperiences.*.companyName' => 'required_if:employment_type,employed,self_employed|string|max:255',
+                        'workExperiences.*.companyAddress' => 'required_if:employment_type,employed,self_employed|string',
+                        'workExperiences.*.dateFrom' => 'required_if:employment_type,employed,self_employed|integer',
+                        'workExperiences.*.dateTo' => 'required_if:employment_type,employed,self_employed|integer',
+                        'workExperiences.*.employmentStatus' => 'required_if:employment_type,employed|string|max:255',
+                        'workExperiences.*.supervisorName' => 'required_if:employment_type,employed|string|max:255',
+                        'workExperiences.*.reference1_name' => 'required_if:employment_type,self_employed|string|max:255',
+                        'workExperiences.*.reference1_contact' => 'required_if:employment_type,self_employed|string|max:255',
+                        'workExperiences.*.reference2_name' => 'required_if:employment_type,self_employed|string|max:255',
+                        'workExperiences.*.reference2_contact' => 'required_if:employment_type,self_employed|string|max:255',
+                        'workExperiences.*.reference3_name' => 'required_if:employment_type,self_employed|string|max:255',
+                        'workExperiences.*.reference3_contact' => 'required_if:employment_type,self_employed|string|max:255',
+                        'workExperiences.*.reasonForLeaving' => 'required_if:employment_type,employed,self_employed|string',
+                        'workExperiences.*.responsibilities' => 'required_if:employment_type,employed,self_employed|string',
                         'workExperiences.*.documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
                     ]);
 
-                    // Delete existing records first
+                    // Delete existing work experiences
                     WorkExperience::where('applicant_id', $request->applicant_id)->delete();
 
-                    // Create new records
-                    foreach ($request->workExperiences as $index => $experience) {
-                        // Handle document upload if present
-                        $documentPath = null;
-                        if (isset($experience['documents']) && $request->hasFile("workExperiences.{$index}.documents")) {
-                            try {
-                                $documentPath = $request->file("workExperiences.{$index}.documents")
-                                    ->store('work-experiences', 'public');
-                            } catch (\Exception $e) {
-                                \Log::error("Failed to upload work experience document: " . $e->getMessage());
-                                throw new \Exception("Failed to upload document for work experience " . ($index + 1));
-                            }
-                        }
+                    // Only create records if not "no_employment"
+                    if ($validatedData['employment_type'] !== 'no_employment') {
+                        foreach ($request->workExperiences as $experience) {
+                            $workExperience = new WorkExperience([
+                                'applicant_id' => $request->applicant_id,
+                                'employment_type' => $validatedData['employment_type'],
+                                'designation' => $experience['designation'],
+                                'companyName' => $experience['companyName'],
+                                'companyAddress' => $experience['companyAddress'],
+                                'dateFrom' => $experience['dateFrom'],
+                                'dateTo' => $experience['dateTo'],
+                                'reasonForLeaving' => $experience['reasonForLeaving'],
+                                'responsibilities' => $experience['responsibilities'],
+                                'employmentStatus' => $experience['employmentStatus'] ?? null,
+                                'supervisorName' => $experience['supervisorName'] ?? null,
+                                'reference1_name' => $experience['reference1_name'] ?? null,
+                                'reference1_contact' => $experience['reference1_contact'] ?? null,
+                                'reference2_name' => $experience['reference2_name'] ?? null,
+                                'reference2_contact' => $experience['reference2_contact'] ?? null,
+                                'reference3_name' => $experience['reference3_name'] ?? null,
+                                'reference3_contact' => $experience['reference3_contact'] ?? null
+                            ]);
 
-                        WorkExperience::create([
-                            'applicant_id' => $request->applicant_id,
-                            'designation' => $experience['designation'],
-                            'dateFrom' => $experience['dateFrom'],
-                            'dateTo' => $experience['dateTo'],
-                            'companyName' => $experience['companyName'],
-                            'companyAddress' => $experience['companyAddress'],
-                            'employmentStatus' => $experience['employmentStatus'],
-                            'supervisorName' => $experience['supervisorName'],
-                            'reasonForLeaving' => $experience['reasonForLeaving'],
-                            'responsibilities' => $experience['responsibilities'],
-                            'documents' => $documentPath
-                        ]);
+                            // Handle document upload
+                            if (isset($experience['documents']) && $experience['documents'] instanceof UploadedFile) {
+                                $path = $experience['documents']->store('work-documents', 'public');
+                                $workExperience->documents = $path;
+                            }
+
+                            $workExperience->save();
+                        }
                     }
                     break;
 
@@ -359,23 +370,23 @@ class ApplicationController extends Controller
 
                         // Academic Awards
                         'academicAwards' => 'present|array',
-                        'academicAwards.*.title' => 'required|string',
-                        'academicAwards.*.institution' => 'required|string',
-                        'academicAwards.*.dateReceived' => 'required|date',
-                        'academicAwards.*.description' => 'required|string',
+                        'academicAwards.*.title' => 'nullable|string',
+                        'academicAwards.*.institution' => 'nullable|string',
+                        'academicAwards.*.dateReceived' => 'nullable|date',
+                        'academicAwards.*.description' => 'nullable|string',
                         'academicAwards.*.document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
 
                         // Community Awards
                         'communityAwards' => 'present|array',
-                        'communityAwards.*.title' => 'required|string',
-                        'communityAwards.*.organization' => 'required|string',
-                        'communityAwards.*.dateAwarded' => 'required|date',
+                        'communityAwards.*.title' => 'nullable|string',
+                        'communityAwards.*.organization' => 'nullable|string',
+                        'communityAwards.*.dateAwarded' => 'nullable|date',
 
                         // Work Awards
                         'workAwards' => 'present|array',
-                        'workAwards.*.title' => 'required|string',
-                        'workAwards.*.organization' => 'required|string',
-                        'workAwards.*.dateAwarded' => 'required|date'
+                        'workAwards.*.title' => 'nullable|string',
+                        'workAwards.*.organization' => 'nullable|string',
+                        'workAwards.*.dateAwarded' => 'nullable|date'
                     ]);
 
                     // Handle Academic Awards
@@ -453,34 +464,36 @@ class ApplicationController extends Controller
                 case 6: // Creative Works
                     $validatedData = $request->validate([
                         'applicant_id' => 'required|exists:personal_infos,applicant_id',
-                        'creativeWorks' => 'required|array|min:1',
-                        'creativeWorks.*.title' => 'required|string|max:255',
-                        'creativeWorks.*.description' => 'required|string',
-                        'creativeWorks.*.significance' => 'required|string',
-                        'creativeWorks.*.dateCompleted' => 'required|date',
-                        'creativeWorks.*.corroboratingBody' => 'required|string|max:255',
+                        'creativeWorks' => 'nullable|array|min:1',
+                        'creativeWorks.*.title' => 'nullable|string|max:255',
+                        'creativeWorks.*.description' => 'nullable|string',
+                        'creativeWorks.*.significance' => 'nullable|string',
+                        'creativeWorks.*.dateCompleted' => 'nullable|date',
+                        'creativeWorks.*.corroboratingBody' => 'nullable|string|max:255',
                     ]);
 
                     try {
                         // Delete existing records first
                         CreativeWork::where('applicant_id', $request->applicant_id)->delete();
 
-                        // Create new records
-                        foreach ($validatedData['creativeWorks'] as $work) {
-                            CreativeWork::create([
-                                'applicant_id' => $validatedData['applicant_id'],
-                                'title' => $work['title'],
-                                'description' => $work['description'],
-                                'significance' => $work['significance'],
-                                'date_completed' => $work['dateCompleted'],
-                                'corroborating_body' => $work['corroboratingBody']
-                            ]);
+                        // Create new records only if data exists
+                        if (!empty($validatedData['creativeWorks'])) {
+                            foreach ($validatedData['creativeWorks'] as $work) {
+                                CreativeWork::create([
+                                    'applicant_id' => $validatedData['applicant_id'],
+                                    'title' => $work['title'] ?? null,
+                                    'description' => $work['description'] ?? null,
+                                    'significance' => $work['significance'] ?? null,
+                                    'date_completed' => $work['dateCompleted'] ?? null,
+                                    'corroborating_body' => $work['corroboratingBody'] ?? null
+                                ]);
+                            }
                         }
 
                         // Debug logging
                         \Log::info('Creative works saved successfully', [
                             'applicant_id' => $request->applicant_id,
-                            'count' => count($validatedData['creativeWorks'])
+                            'count' => count($validatedData['creativeWorks'] ?? [])
                         ]);
 
                     } catch (\Exception $e) {
@@ -502,9 +515,9 @@ class ApplicationController extends Controller
                         'workActivities' => 'present|array',
                         'workActivities.*.description' => 'required|string',
                         'volunteerActivities' => 'present|array',
-                        'volunteerActivities.*.description' => 'required|string',
+                        'volunteerActivities.*.description' => 'nullable|string',
                         'travels' => 'present|array',
-                        'travels.*.description' => 'required|string'
+                        'travels.*.description' => 'nullable|string'
                     ]);
 
                     // Ensure at least one category has entries
@@ -607,12 +620,24 @@ class ApplicationController extends Controller
     public function finalizeApplication(Request $request)
     {
         try {
-            $personalInfo = PersonalInfo::where('applicant_id', $request->applicant_id)->firstOrFail();
+            $request->validate([
+                'applicant_id' => 'required|exists:personal_infos,applicant_id'
+            ]);
+
+            $personalInfo = PersonalInfo::with('essay')
+                ->where('applicant_id', $request->applicant_id)
+                ->firstOrFail();
+
+            // Ensure essay exists
+            if (!$personalInfo->essay || empty($personalInfo->essay->content)) {
+                return response()->json([
+                    'error' => 'Cannot submit application without completing the essay'
+                ], 422);
+            }
 
             DB::transaction(function () use ($personalInfo) {
                 $personalInfo->update(['status' => 'pending']);
-
-                // Send notification to all admin users
+                
                 $admins = User::all();
                 Notification::send($admins, new ApplicationSubmitted(
                     "{$personalInfo->firstName} {$personalInfo->lastName}",
@@ -639,10 +664,14 @@ class ApplicationController extends Controller
         try {
             $personalInfo = PersonalInfo::with([
                 'learningObjective',
-                'education', // Just load all education records - they're differentiated by 'type'
+                'education',
+                'workExperiences',
                 'academicAwards',
                 'communityAwards',
-                'workAwards'
+                'workAwards',
+                'creativeWorks',
+                'lifelongLearning',
+                'essay'
             ])->where('applicant_id', $applicantId)
               ->firstOrFail();
 
@@ -666,18 +695,18 @@ class ApplicationController extends Controller
             ]);
 
             $application = PersonalInfo::with([
-                    'learningObjective',
-                    'education',
-                    'workExperiences',
-                    'academicAwards',
-                    'communityAwards',
-                    'workAwards',
-                    'creativeWorks',
-                    'lifelongLearning',
-                    'essay'
-                ])
-                ->where('applicant_id', $request->applicant_id)
-                ->firstOrFail();
+                'learningObjective',
+                'education',
+                'workExperiences',
+                'academicAwards',
+                'communityAwards',
+                'workAwards',
+                'creativeWorks',
+                'lifelongLearning',
+                'essay'
+            ])
+            ->where('applicant_id', $request->applicant_id)
+            ->firstOrFail();
 
             return response()->json([
                 'status' => 'success',
@@ -686,9 +715,15 @@ class ApplicationController extends Controller
                     'status' => $application->status,
                     'submitted_at' => $application->created_at->format('M d, Y h:i A'),
                     'personal_info' => $application,
+                    'learning_objective' => $application->learningObjective,
                     'education' => $application->education,
                     'work_experience' => $application->workExperiences,
-                    // Add other relationships as needed
+                    'academic_awards' => $application->academicAwards,
+                    'community_awards' => $application->communityAwards,
+                    'work_awards' => $application->workAwards,
+                    'creative_works' => $application->creativeWorks,
+                    'lifelong_learning' => $application->lifelongLearning,
+                    'essay' => $application->essay
                 ]
             ]);
 

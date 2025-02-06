@@ -104,18 +104,7 @@ export default function MultiStepForm() {
             dateCertified: '',
             rating: ''
         }],
-        workExperiences: [{
-            designation: '',
-            dateFrom: '',
-            dateTo: '',
-            companyName: '',
-            companyAddress: '',
-            employmentStatus: '',
-            supervisorName: '',
-            reasonForLeaving: '',
-            responsibilities: '',
-            references: ['', '', '']
-        }],
+        workExperiences: [],
         academicAwards: [{
             title: '',
             institution: '',
@@ -150,6 +139,7 @@ export default function MultiStepForm() {
         marriageCertificate: null,
         legalDocument: null,
         applicant_id: '',
+        employment_type: 'no_employment',
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -215,7 +205,6 @@ export default function MultiStepForm() {
 
         setLoading(true);
         try {
-            // Add proper headers for FormData
             const config = {
                 headers: {
                     'Content-Type': (currentStep === 1 || currentStep === 3 || currentStep === 4 || currentStep === 5 || currentStep === 6 || currentStep === 7 || currentStep === 8)
@@ -245,9 +234,17 @@ export default function MultiStepForm() {
             setCurrentStep(prev => prev + 1);
             setErrors({});
         } catch (error) {
-            console.error('API Error:', error.response?.data || error.message);
+            console.error('Raw validation errors:', error.response?.data?.errors);
+            
             if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
+                const transformedErrors = {};
+                Object.entries(error.response.data.errors).forEach(([key, value]) => {
+                    // For creative works, keep the original key format
+                    transformedErrors[key] = Array.isArray(value) ? value[0] : value;
+                });
+                
+                setErrors(transformedErrors);
+                console.log('Setting errors:', transformedErrors);
             }
         } finally {
             setLoading(false);
@@ -378,67 +375,71 @@ export default function MultiStepForm() {
             case 4: // Work Experience
                 const workExperienceFormData = new FormData();
                 workExperienceFormData.append('applicant_id', formData.applicant_id);
+                workExperienceFormData.append('employment_type', formData.employment_type);
 
-                // Append each work experience as a separate entry
-                formData.workExperiences.forEach((exp, index) => {
-                    if (exp.designation || exp.companyName) {
-                        workExperienceFormData.append(`workExperiences[${index}][designation]`, exp.designation);
-                        workExperienceFormData.append(`workExperiences[${index}][dateFrom]`, parseInt(exp.dateFrom) || '');  // Parse as integer
-                        workExperienceFormData.append(`workExperiences[${index}][dateTo]`, parseInt(exp.dateTo) || '');      // Parse as integer
-                        workExperienceFormData.append(`workExperiences[${index}][companyName]`, exp.companyName);
-                        workExperienceFormData.append(`workExperiences[${index}][companyAddress]`, exp.companyAddress);
-                        workExperienceFormData.append(`workExperiences[${index}][employmentStatus]`, exp.employmentStatus);
-                        workExperienceFormData.append(`workExperiences[${index}][supervisorName]`, exp.supervisorName);
-                        workExperienceFormData.append(`workExperiences[${index}][reasonForLeaving]`, exp.reasonForLeaving);
-                        workExperienceFormData.append(`workExperiences[${index}][responsibilities]`, exp.responsibilities);
-                        
-                        // Handle document file if it exists
-                        if (exp.documents instanceof File) {
-                            workExperienceFormData.append(`workExperiences[${index}][documents]`, exp.documents);
+                // Properly format array data for Laravel with nested fields
+                formData.workExperiences?.forEach((experience, index) => {
+                    // Append common fields
+                    workExperienceFormData.append(`workExperiences[${index}][designation]`, experience.designation || '');
+                    workExperienceFormData.append(`workExperiences[${index}][companyName]`, experience.companyName || '');
+                    workExperienceFormData.append(`workExperiences[${index}][companyAddress]`, experience.companyAddress || '');
+                    workExperienceFormData.append(`workExperiences[${index}][dateFrom]`, experience.dateFrom || '');
+                    workExperienceFormData.append(`workExperiences[${index}][dateTo]`, experience.dateTo || '');
+                    workExperienceFormData.append(`workExperiences[${index}][reasonForLeaving]`, experience.reasonForLeaving || '');
+                    workExperienceFormData.append(`workExperiences[${index}][responsibilities]`, experience.responsibilities || '');
+
+                    // Append employment type specific fields
+                    if (formData.employment_type === 'employed') {
+                        workExperienceFormData.append(`workExperiences[${index}][employmentStatus]`, experience.employmentStatus || '');
+                        workExperienceFormData.append(`workExperiences[${index}][supervisorName]`, experience.supervisorName || '');
+                    }
+
+                    if (formData.employment_type === 'self_employed') {
+                        // Append reference contacts
+                        for (let refNum = 1; refNum <= 3; refNum++) {
+                            workExperienceFormData.append(`workExperiences[${index}][reference${refNum}_name]`, experience[`reference${refNum}_name`] || '');
+                            workExperienceFormData.append(`workExperiences[${index}][reference${refNum}_contact]`, experience[`reference${refNum}_contact`] || '');
                         }
+                    }
+
+                    // Handle file upload
+                    if (experience.documents instanceof File) {
+                        workExperienceFormData.append(`workExperiences[${index}][documents]`, experience.documents);
                     }
                 });
 
                 return workExperienceFormData;
 
-            case 5: // Awards
-                const awardsFormData = new FormData();
-                awardsFormData.append('applicant_id', formData.applicant_id);
-
+            case 5: // Honors & Awards
+                const honorsFormData = new FormData();
+                honorsFormData.append('applicant_id', formData.applicant_id);
+                
                 // Academic Awards
                 formData.academicAwards.forEach((award, index) => {
-                    if (award.title || award.institution) {
-                        awardsFormData.append(`academicAwards[${index}][title]`, award.title);
-                        awardsFormData.append(`academicAwards[${index}][institution]`, award.institution);
-                        awardsFormData.append(`academicAwards[${index}][dateReceived]`, award.dateReceived);
-                        awardsFormData.append(`academicAwards[${index}][description]`, award.description);
-
-                        // Handle document file if exists
-                        if (award.document instanceof File) {
-                            awardsFormData.append(`academicAwards[${index}][document]`, award.document);
-                        }
+                    honorsFormData.append(`academicAwards[${index}][title]`, award.title);
+                    honorsFormData.append(`academicAwards[${index}][institution]`, award.institution);
+                    honorsFormData.append(`academicAwards[${index}][dateReceived]`, award.dateReceived);
+                    honorsFormData.append(`academicAwards[${index}][description]`, award.description);
+                    if (award.document instanceof File) {
+                        honorsFormData.append(`academicAwards[${index}][document]`, award.document);
                     }
                 });
 
                 // Community Awards
                 formData.communityAwards.forEach((award, index) => {
-                    if (award.title || award.organization) {
-                        awardsFormData.append(`communityAwards[${index}][title]`, award.title);
-                        awardsFormData.append(`communityAwards[${index}][organization]`, award.organization);
-                        awardsFormData.append(`communityAwards[${index}][dateAwarded]`, award.dateAwarded);
-                    }
+                    honorsFormData.append(`communityAwards[${index}][title]`, award.title);
+                    honorsFormData.append(`communityAwards[${index}][organization]`, award.organization);
+                    honorsFormData.append(`communityAwards[${index}][dateAwarded]`, award.dateAwarded);
                 });
 
                 // Work Awards
                 formData.workAwards.forEach((award, index) => {
-                    if (award.title || award.organization) {
-                        awardsFormData.append(`workAwards[${index}][title]`, award.title);
-                        awardsFormData.append(`workAwards[${index}][organization]`, award.organization);
-                        awardsFormData.append(`workAwards[${index}][dateAwarded]`, award.dateAwarded);
-                    }
+                    honorsFormData.append(`workAwards[${index}][title]`, award.title);
+                    honorsFormData.append(`workAwards[${index}][organization]`, award.organization);
+                    honorsFormData.append(`workAwards[${index}][dateAwarded]`, award.dateAwarded);
                 });
 
-                return awardsFormData;
+                return honorsFormData;
 
             case 6: // Creative Works
                 const creativeWorksFormData = new FormData();
@@ -607,6 +608,7 @@ export default function MultiStepForm() {
                     handleArrayFieldChange={handleArrayFieldChange}
                     addArrayItem={addArrayItem}
                     removeArrayItem={removeArrayItem}
+                    setFormData={setFormData}
                 />;
             case 5:
                 return <HonorsAwardsStep

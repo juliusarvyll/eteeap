@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('academic_awards', function (Blueprint $table) {
             $table->id();
             $table->string('applicant_id');
-            $table->string('title');
-            $table->string('institution');
-            $table->date('dateReceived');
-            $table->text('description');
+            $table->string('title')->nullable();
+            $table->string('institution')->nullable();
+            $table->date('dateReceived')->nullable();
+            $table->text('description')->nullable();
             $table->string('document')->nullable();
             $table->timestamps();
             
@@ -27,9 +27,9 @@ return new class extends Migration
         Schema::create('community_awards', function (Blueprint $table) {
             $table->id();
             $table->string('applicant_id');
-            $table->string('title');
-            $table->string('organization');
-            $table->date('dateAwarded');
+            $table->string('title')->nullable();
+            $table->string('organization')->nullable();
+            $table->date('dateAwarded')->nullable();
             $table->timestamps();
             
             $table->foreign('applicant_id')
@@ -41,11 +41,12 @@ return new class extends Migration
         Schema::create('work_awards', function (Blueprint $table) {
             $table->id();
             $table->string('applicant_id');
-            $table->string('title');
-            $table->string('organization');
-            $table->date('dateAwarded');
+            $table->string('title')->nullable();
+            $table->string('organization')->nullable();
+            $table->date('dateAwarded')->nullable();
             $table->timestamps();
             
+
             $table->foreign('applicant_id')
                   ->references('applicant_id')
                   ->on('personal_infos')

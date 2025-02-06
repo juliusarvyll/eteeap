@@ -34,7 +34,7 @@ export default function EducationStep({
                                     onChange={handleInputChange}
                                 />
                                 {errors.elementarySchool && (
-                                    <InputError message={errors.elementarySchool} className="mt-2" />
+                                    <InputError message={errors.elementarySchool[0]} className="mt-2" />
                                 )}
                             </div>
                             <div>
@@ -47,7 +47,7 @@ export default function EducationStep({
                                     onChange={handleInputChange}
                                 />
                                 {errors.elementaryAddress && (
-                                    <InputError message={errors.elementaryAddress} className="mt-2" />
+                                    <InputError message={errors.elementaryAddress[0]} className="mt-2" />
                                 )}
                             </div>
                         </div>
@@ -72,7 +72,7 @@ export default function EducationStep({
                                     })}
                                 />
                                 {errors.elementaryDateFrom && (
-                                    <InputError message={errors.elementaryDateFrom} className="mt-2" />
+                                    <InputError message={errors.elementaryDateFrom[0]} className="mt-2" />
                                 )}
                             </div>
                             <div>
@@ -89,7 +89,7 @@ export default function EducationStep({
                                     onChange={handleInputChange}
                                 />
                                 {errors.elementaryDateTo && (
-                                    <InputError message={errors.elementaryDateTo} className="mt-2" />
+                                    <InputError message={errors.elementaryDateTo[0]} className="mt-2" />
                                 )}
                             </div>
                         </div>
@@ -116,7 +116,7 @@ export default function EducationStep({
                                 <InputLabel htmlFor="hasElementaryDiploma" value="Do you have your elementary school diploma?" required />
                             </div>
                             {errors.hasElementaryDiploma && (
-                                <InputError message={errors.hasElementaryDiploma} className="mt-2" />
+                                <InputError message={errors.hasElementaryDiploma[0]} className="mt-2" />
                             )}
                         </div>
 
@@ -140,7 +140,7 @@ export default function EducationStep({
                                 />
                                 <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
                                 {errors.elementaryDiplomaFile && (
-                                    <InputError message={errors.elementaryDiplomaFile} className="mt-2" />
+                                    <InputError message={errors.elementaryDiplomaFile[0]} className="mt-2" />
                                 )}
                             </div>
                         )}
@@ -233,25 +233,25 @@ export default function EducationStep({
                                             <div>
                                                 <InputLabel value="Name of School" required />
                                                 <TextInput
-                                                    name="name"
+                                                    name={`highSchools.${index}.name`}
                                                     value={school.name}
                                                     onChange={(e) => handleArrayFieldChange('highSchools', index, 'name', e.target.value)}
                                                     className={`mt-1 block w-full ${errors[`highSchools.${index}.name`] ? 'border-red-500' : ''}`}
                                                 />
                                                 {errors[`highSchools.${index}.name`] && (
-                                                    <InputError message={errors[`highSchools.${index}.name`]} className="mt-2" />
+                                                    <InputError message={errors[`highSchools.${index}.name`][0]} className="mt-2" />
                                                 )}
                                             </div>
                                             <div>
                                                 <InputLabel value="Address" required />
                                                 <TextInput
-                                                    name="address"
+                                                    name={`highSchools.${index}.address`}
                                                     value={school.address}
                                                     onChange={(e) => handleArrayFieldChange('highSchools', index, 'address', e.target.value)}
                                                     className={`mt-1 block w-full ${errors[`highSchools.${index}.address`] ? 'border-red-500' : ''}`}
                                                 />
                                                 {errors[`highSchools.${index}.address`] && (
-                                                    <InputError message={errors[`highSchools.${index}.address`]} className="mt-2" />
+                                                    <InputError message={errors[`highSchools.${index}.address`][0]} className="mt-2" />
                                                 )}
                                             </div>
                                             <div>
@@ -304,7 +304,7 @@ export default function EducationStep({
                                                     className={`mt-1 block w-full ${errors[`highSchools.${index}.dateFrom`] ? 'border-red-500' : ''}`}
                                                 />
                                                 {errors[`highSchools.${index}.dateFrom`] && (
-                                                    <InputError message={errors[`highSchools.${index}.dateFrom`]} className="mt-2" />
+                                                    <InputError message={errors[`highSchools.${index}.dateFrom`][0]} className="mt-2" />
                                                 )}
                                             </div>
                                             <div>
@@ -320,7 +320,7 @@ export default function EducationStep({
                                                     className={`mt-1 block w-full ${errors[`highSchools.${index}.dateTo`] ? 'border-red-500' : ''}`}
                                                 />
                                                 {errors[`highSchools.${index}.dateTo`] && (
-                                                    <InputError message={errors[`highSchools.${index}.dateTo`]} className="mt-2" />
+                                                    <InputError message={errors[`highSchools.${index}.dateTo`][0]} className="mt-2" />
                                                 )}
                                             </div>
                                         </div>
@@ -346,7 +346,7 @@ export default function EducationStep({
                                                 <InputLabel htmlFor="hasHighSchoolDiploma" value="Do you have your high school diploma?" required />
                                             </div>
                                             {errors.hasHighSchoolDiploma && (
-                                                <InputError message={errors.hasHighSchoolDiploma} className="mt-2" />
+                                                <InputError message={errors.hasHighSchoolDiploma[0]} className="mt-2" />
                                             )}
                                         </div>
 
@@ -370,7 +370,7 @@ export default function EducationStep({
                                                 />
                                                 <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
                                                 {errors.highSchoolDiplomaFile && (
-                                                    <InputError message={errors.highSchoolDiplomaFile} className="mt-2" />
+                                                    <InputError message={errors.highSchoolDiplomaFile[0]} className="mt-2" />
                                                 )}
                                             </div>
                                         )}
@@ -416,7 +416,7 @@ export default function EducationStep({
                                             })}
                                         />
                                         {errors.peptYear && (
-                                            <InputError message={errors.peptYear} className="mt-2" />
+                                            <InputError message={errors.peptYear[0]} className="mt-2" />
                                         )}
                                     </div>
                                 </div>
@@ -433,7 +433,7 @@ export default function EducationStep({
                                             onChange={handleInputChange}
                                         />
                                         {errors.peptGrade && (
-                                            <InputError message={errors.peptGrade} className="mt-2" />
+                                            <InputError message={errors.peptGrade[0]} className="mt-2" />
                                         )}
                                     </div>
                                 </div>
@@ -457,7 +457,7 @@ export default function EducationStep({
                                     />
                                     <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
                                     {errors.peptCertificateFile && (
-                                        <InputError message={errors.peptCertificateFile} className="mt-2" />
+                                        <InputError message={errors.peptCertificateFile[0]} className="mt-2" />
                                     )}
                                 </div>
                             </div>
@@ -518,7 +518,9 @@ export default function EducationStep({
                                     hover:file:bg-blue-100"
                             />
                             <p className="mt-1 text-sm text-gray-500">You can select multiple files if you have more than one diploma</p>
-                            <InputError message={errors.postSecondaryDiplomaFile} className="mt-2" />
+                            {errors.postSecondaryDiplomaFile && (
+                                <InputError message={errors.postSecondaryDiplomaFile[0]} className="mt-2" />
+                            )}
                         </div>
                     )}
 
@@ -528,32 +530,44 @@ export default function EducationStep({
                         <div key={index} className="border p-4 rounded-lg space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <InputLabel value="Course/Degree Program Enrolled" />
+                                    <InputLabel value="Course/Degree Program" />
                                     <TextInput
+                                        name={`postSecondary.${index}.program`}
                                         value={education.program}
-                                        className="mt-1 block w-full"
+                                        className={`mt-1 block w-full ${errors[`postSecondary.${index}.program`] ? 'border-red-500' : ''}`}
                                         onChange={(e) => handleArrayFieldChange('postSecondary', index, 'program', e.target.value)}
                                     />
+                                    {errors[`postSecondary.${index}.program`] && (
+                                        <InputError message={errors[`postSecondary.${index}.program`][0]} className="mt-2" />
+                                    )}
                                 </div>
                                 <div>
                                     <InputLabel value="Name of Institution" />
                                     <TextInput
+                                        name={`postSecondary.${index}.institution`}
                                         value={education.institution}
-                                        className="mt-1 block w-full"
+                                        className={`mt-1 block w-full ${errors[`postSecondary.${index}.institution`] ? 'border-red-500' : ''}`}
                                         onChange={(e) => handleArrayFieldChange('postSecondary', index, 'institution', e.target.value)}
                                     />
+                                    {errors[`postSecondary.${index}.institution`] && (
+                                        <InputError message={errors[`postSecondary.${index}.institution`][0]} className="mt-2" />
+                                    )}
                                 </div>
                                 <div>
                                     <InputLabel value="School Year" />
                                     <TextInput
                                         type="number"
+                                        name={`postSecondary.${index}.schoolYear`}
                                         value={education.schoolYear || ''}
                                         min="1900"
                                         max={new Date().getFullYear()}
                                         placeholder="YYYY"
-                                        className="mt-1 block w-full"
+                                        className={`mt-1 block w-full ${errors[`postSecondary.${index}.schoolYear`] ? 'border-red-500' : ''}`}
                                         onChange={(e) => handleArrayFieldChange('postSecondary', index, 'schoolYear', parseInt(e.target.value) || '')}
                                     />
+                                    {errors[`postSecondary.${index}.schoolYear`] && (
+                                        <InputError message={errors[`postSecondary.${index}.schoolYear`][0]} className="mt-2" />
+                                    )}
                                 </div>
                             </div>
                             {formData.postSecondary.length > 1 && (
@@ -594,44 +608,63 @@ export default function EducationStep({
                             <div>
                                 <InputLabel value="Title of Training Program" />
                                 <TextInput
+                                    name={`nonFormalEducation.${index}.title`}
                                     value={training.title}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`nonFormalEducation.${index}.title`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('nonFormalEducation', index, 'title', e.target.value)}
                                 />
+                                {errors[`nonFormalEducation.${index}.title`] && (
+                                    <InputError message={errors[`nonFormalEducation.${index}.title`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Sponsoring Organization" />
                                 <TextInput
+                                    name={`nonFormalEducation.${index}.organization`}
                                     value={training.organization}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`nonFormalEducation.${index}.organization`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('nonFormalEducation', index, 'organization', e.target.value)}
                                 />
+                                {errors[`nonFormalEducation.${index}.organization`] && (
+                                    <InputError message={errors[`nonFormalEducation.${index}.organization`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Date" />
                                 <TextInput
                                     type="date"
+                                    name={`nonFormalEducation.${index}.date`}
                                     value={training.date}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`nonFormalEducation.${index}.date`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('nonFormalEducation', index, 'date', e.target.value)}
                                 />
+                                {errors[`nonFormalEducation.${index}.date`] && (
+                                    <InputError message={errors[`nonFormalEducation.${index}.date`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Title of Certificate Obtained" />
                                 <TextInput
+                                    name={`nonFormalEducation.${index}.certificate`}
                                     value={training.certificate}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`nonFormalEducation.${index}.certificate`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('nonFormalEducation', index, 'certificate', e.target.value)}
                                 />
+                                {errors[`nonFormalEducation.${index}.certificate`] && (
+                                    <InputError message={errors[`nonFormalEducation.${index}.certificate`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Nature of Participation" />
                                 <TextInput
+                                    name={`nonFormalEducation.${index}.participation`}
                                     value={training.participation}
-                                    className="mt-1 block w-full"
-                                    placeholder="e.g., Trainer, Participant, Facilitator"
+                                    className={`mt-1 block w-full ${errors[`nonFormalEducation.${index}.participation`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('nonFormalEducation', index, 'participation', e.target.value)}
                                 />
+                                {errors[`nonFormalEducation.${index}.participation`] && (
+                                    <InputError message={errors[`nonFormalEducation.${index}.participation`][0]} className="mt-2" />
+                                )}
                             </div>
                         </div>
                         {formData.nonFormalEducation.length > 1 && (
@@ -670,40 +703,56 @@ export default function EducationStep({
                     <div key={index} className="border p-4 rounded-lg space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel value="Title of Certification Examination" />
+                                <InputLabel value="Title of Certification" />
                                 <TextInput
+                                    name={`certifications.${index}.title`}
                                     value={cert.title}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`certifications.${index}.title`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('certifications', index, 'title', e.target.value)}
                                 />
+                                {errors[`certifications.${index}.title`] && (
+                                    <InputError message={errors[`certifications.${index}.title`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Name and Address of Certifying Agency" />
                                 <TextInput
+                                    name={`certifications.${index}.agency`}
                                     value={cert.agency}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`certifications.${index}.agency`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('certifications', index, 'agency', e.target.value)}
                                 />
+                                {errors[`certifications.${index}.agency`] && (
+                                    <InputError message={errors[`certifications.${index}.agency`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Year Certified" />
                                 <TextInput
                                     type="number"
+                                    name={`certifications.${index}.dateCertified`}
                                     value={cert.dateCertified || ''}
                                     min="1900"
                                     max={new Date().getFullYear()}
                                     placeholder="YYYY"
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`certifications.${index}.dateCertified`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('certifications', index, 'dateCertified', parseInt(e.target.value) || '')}
                                 />
+                                {errors[`certifications.${index}.dateCertified`] && (
+                                    <InputError message={errors[`certifications.${index}.dateCertified`][0]} className="mt-2" />
+                                )}
                             </div>
                             <div>
                                 <InputLabel value="Rating" />
                                 <TextInput
+                                    name={`certifications.${index}.rating`}
                                     value={cert.rating}
-                                    className="mt-1 block w-full"
+                                    className={`mt-1 block w-full ${errors[`certifications.${index}.rating`] ? 'border-red-500' : ''}`}
                                     onChange={(e) => handleArrayFieldChange('certifications', index, 'rating', e.target.value)}
                                 />
+                                {errors[`certifications.${index}.rating`] && (
+                                    <InputError message={errors[`certifications.${index}.rating`][0]} className="mt-2" />
+                                )}
                             </div>
                         </div>
                         <div>
@@ -724,7 +773,7 @@ export default function EducationStep({
                             />
                             <p className="text-sm text-gray-500 mt-1">Accepted formats: PDF, JPG, PNG (max 2MB)</p>
                             {errors[`certifications.${index}.file`] && (
-                                <InputError message={errors[`certifications.${index}.file`]} className="mt-2" />
+                                <InputError message={errors[`certifications.${index}.file`][0]} className="mt-2" />
                             )}
                         </div>
                         {formData.certifications.length > 1 && (

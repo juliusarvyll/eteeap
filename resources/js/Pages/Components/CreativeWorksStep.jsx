@@ -11,7 +11,8 @@ export default function CreativeWorksStep({
     addArrayItem,
     removeArrayItem
 }) {
-
+    // Add debug logs
+    console.log('CreativeWorksStep errors:', errors);
 
     return (
         <div className="space-y-8">
@@ -42,7 +43,9 @@ export default function CreativeWorksStep({
                             className="mt-1 block w-full"
                             onChange={(e) => handleArrayFieldChange('creativeWorks', index, 'title', e.target.value)}
                         />
-                        <InputError message={errors[`creativeWorks.${index}.title`]} className="mt-2" />
+                        {errors[`creativeWorks.${index}.title`] && (
+                            <InputError message={errors[`creativeWorks.${index}.title`]} className="mt-2" />
+                        )}
                     </div>
 
                     {/* Description */}
@@ -58,7 +61,9 @@ export default function CreativeWorksStep({
                             placeholder="Provide a detailed description of your work/accomplishment..."
                             onChange={(e) => handleArrayFieldChange('creativeWorks', index, 'description', e.target.value)}
                         />
-                        <InputError message={errors[`creativeWorks.${index}.description`]} className="mt-2" />
+                        {errors[`creativeWorks.${index}.description`] && (
+                            <InputError message={errors[`creativeWorks.${index}.description`]} className="mt-2" />
+                        )}
                     </div>
 
                     {/* Significance */}
@@ -74,7 +79,9 @@ export default function CreativeWorksStep({
                             placeholder="Explain why this qualifies as a special accomplishment..."
                             onChange={(e) => handleArrayFieldChange('creativeWorks', index, 'significance', e.target.value)}
                         />
-                        <InputError message={errors[`creativeWorks.${index}.significance`]} className="mt-2" />
+                        {errors[`creativeWorks.${index}.significance`] && (
+                            <InputError message={errors[`creativeWorks.${index}.significance`]} className="mt-2" />
+                        )}
                     </div>
 
                     {/* Date Completed */}
@@ -89,7 +96,9 @@ export default function CreativeWorksStep({
                             className="mt-1 block w-full"
                             onChange={(e) => handleArrayFieldChange('creativeWorks', index, 'dateCompleted', e.target.value)}
                         />
-                        <InputError message={errors[`creativeWorks.${index}.dateCompleted`]} className="mt-2" />
+                        {errors[`creativeWorks.${index}.dateCompleted`] && (
+                            <InputError message={errors[`creativeWorks.${index}.dateCompleted`]} className="mt-2" />
+                        )}
                     </div>
 
                     {/* Corroborating Institution */}
@@ -104,7 +113,9 @@ export default function CreativeWorksStep({
                             placeholder="Name of institution that can verify this accomplishment"
                             onChange={(e) => handleArrayFieldChange('creativeWorks', index, 'corroboratingBody', e.target.value)}
                         />
-                        <InputError message={errors[`creativeWorks.${index}.corroboratingBody`]} className="mt-2" />
+                        {errors[`creativeWorks.${index}.corroboratingBody`] && (
+                            <InputError message={errors[`creativeWorks.${index}.corroboratingBody`]} className="mt-2" />
+                        )}
                     </div>
 
                     {/* Remove Button */}

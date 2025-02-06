@@ -20,6 +20,8 @@ use Joaopaulolndev\FilamentPdfViewer\Infolists\Components\PdfViewerEntry;
 use Illuminate\Support\Facades\Storage;
 use Filament\Actions\Action;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+use Webklex\PDFMerger\Facades\PDFMergerFacade as PDFMerger;
 
 class PersonalInfoResource extends Resource
 {
@@ -30,6 +32,13 @@ class PersonalInfoResource extends Resource
     protected static ?string $navigationLabel = 'Applicant';
 
     protected static ?string $modelLabel = 'Applicant Information';
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleteDraftApplications();
+    }
 
     public static function form(Form $form): Form
     {
@@ -362,25 +371,186 @@ class PersonalInfoResource extends Resource
                     ->label('Last Name')
                     ->searchable(),
                 
-                
-                Tables\Columns\TextColumn::make('status')
+                Tables\Columns\SelectColumn::make('status')
                     ->label('Status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'approved' => 'success',
-                        'rejected' => 'danger',
-                        default => 'gray',
-                    })
-                    ->searchable()
-                    ->sortable(),
+                    ->options([
+                        'pending' => 'Pending',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->selectablePlaceholder(false)
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('export_pdf')
+                    ->label('Export PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function ($record) {
+                        try {
+                            // Load all necessary relationships
+                            $record->load([
+                                'lifelongLearning',
+                                'workExperiences',
+                                'academicAwards',
+                                'communityAwards',
+                                'workAwards',
+                                'education',
+                                'learningObjective',  // Added missing relationship
+                                'creativeWorks',      // Added missing relationship
+                                'essay'               // Added missing relationship
+                            ]);
+
+                            // Generate info PDF using DomPDF with explicit configuration
+                            $infoPdf = Pdf::loadView('pdfs.personal-info', [
+                                'record' => $record
+                            ])->setPaper('a4', 'portrait')
+                              ->setOptions([
+                                  'isHtml5ParserEnabled' => true,
+                                  'isRemoteEnabled' => true,
+                                  'defaultFont' => 'Poppins',
+                                  'chroot' => public_path(),
+                              ]);
+
+                            Log::info('Generated info PDF from template');
+
+                            // Initialize PDFMerger
+                            $merger = PDFMerger::init();
+                            Log::info('Initialized PDF Merger');
+
+                            // Add the info PDF as first page
+                            try {
+                                $merger->addString($infoPdf->output(), 'all');
+                                Log::info('Added info PDF to merger');
+                            } catch (\Exception $e) {
+                                Log::error('Failed to add info PDF: ' . $e->getMessage());
+                                throw $e;
+                            }
+
+                            // Modified helper function with existence check
+                            $addDocumentToPdf = function($path, $documentType) use ($merger) {
+                                if (empty($path)) {
+                                    Log::info("Skipped empty {$documentType} path");
+                                    return;
+                                }
+                                
+                                $fullPath = Storage::disk('public')->path($path);
+                                if (!file_exists($fullPath)) {
+                                    Log::warning("Skipping nonexistent {$documentType}: {$fullPath}");
+                                    return;
+                                }
+
+                                try {
+                                    $merger->addString(file_get_contents($fullPath), 'all');
+                                    Log::info("Successfully merged {$documentType}");
+                                } catch (\Exception $e) {
+                                    Log::error("Failed to merge {$documentType}: " . $e->getMessage());
+                                }
+                            };
+
+                            // Add personal document
+                            if ($record->document) {
+                                Log::info('Processing personal document');
+                                $addDocumentToPdf($record->document, 'Personal Document');
+                            }
+
+                            // Add education documents
+                            foreach ($record->education as $edu) {
+                                Log::info("Processing education documents for type: {$edu['type']}");
+                                
+                                // Handle diploma files
+                                $diplomaFile = data_get($edu, 'diploma_file');
+                                if (!empty($diplomaFile)) {
+                                    $documentType = match(data_get($edu, 'type')) {
+                                        'elementary' => 'Elementary Diploma',
+                                        'high_school' => 'High School Diploma',
+                                        'post_secondary' => 'Post Secondary Diploma',
+                                        default => 'Diploma'
+                                    };
+                                    $addDocumentToPdf($diplomaFile, $documentType);
+                                }
+
+                                // Handle certificates (for non-formal education)
+                                if (data_get($edu, 'type') === 'non_formal') {
+                                    $certificate = data_get($edu, 'certificate');
+                                    if (!empty($certificate)) {
+                                        $addDocumentToPdf($certificate, 'Non-Formal Certificate');
+                                    }
+                                }
+                            }
+
+                            // Add work experience documents
+                            Log::info('Processing work experience documents');
+                            foreach ($record->workExperiences as $exp) {
+                                if (!empty($exp['documents'])) {
+                                    $documents = is_array($exp['documents']) ? $exp['documents'] : [$exp['documents']];
+                                    foreach ($documents as $doc) {
+                                        $addDocumentToPdf($doc, 'Work Experience Document');
+                                    }
+                                }
+                            }
+
+                            // Add award documents
+                            Log::info('Processing award documents');
+                            foreach ($record->academicAwards as $award) {
+                                if (!empty($award['document'])) {
+                                    $addDocumentToPdf($award['document'], 'Academic Award');
+                                }
+                            }
+
+                            foreach ($record->communityAwards as $award) {
+                                if (!empty($award['document'])) {
+                                    $addDocumentToPdf($award['document'], 'Community Award');
+                                }
+                            }
+
+                            foreach ($record->workAwards as $award) {
+                                if (!empty($award['document'])) {
+                                    $addDocumentToPdf($award['document'], 'Work Award');
+                                }
+                            }
+
+                            try {
+                                Log::info('Starting final PDF merge');
+                                // Merge PDFs
+                                $merger->merge();
+                                Log::info('PDF merge completed successfully');
+
+                                $content = $merger->output();
+                                
+                                if (empty($content)) {
+                                    throw new \Exception("Generated PDF content is empty");
+                                }
+
+                                return response()->streamDownload(
+                                    function () use ($content) {
+                                        echo $content;
+                                    },
+                                    'applicant-information.pdf',
+                                    [
+                                        'Content-Type' => 'application/pdf',
+                                        'Content-Disposition' => 'attachment; filename="applicant-information.pdf"'
+                                    ]
+                                );
+                            } catch (\Exception $e) {
+                                Log::error("PDF Generation failed: " . $e->getMessage(), [
+                                    'trace' => $e->getTraceAsString(),
+                                    'record_id' => $record->id
+                                ]);
+                                throw new \Exception("Failed to generate PDF: " . $e->getMessage());
+                            }
+                        } catch (\Exception $e) {
+                            Log::error("PDF Generation failed: " . $e->getMessage(), [
+                                'trace' => $e->getTraceAsString(),
+                                'record_id' => $record->id
+                            ]);
+                            throw new \Exception("Failed to generate PDF: " . $e->getMessage());
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -403,12 +573,43 @@ class PersonalInfoResource extends Resource
             'index' => Pages\ListPersonalInfos::route('/'),
             'create' => Pages\CreatePersonalInfo::route('/create'),
             'view' => Pages\ViewPersonalInfo::route('/{record}'),
-            'edit' => Pages\EditPersonalInfo::route('/{record}/edit'),
         ];
     }
 
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('status', 'pending')->count();
+    }
+
+    public static function deleteDraftApplications(): void
+    {
+        try {
+            \Illuminate\Support\Facades\Log::info("Starting draft applications check");
+            
+            $drafts = static::getModel()::query()
+                ->where('status', 'draft')
+                ->where('created_at', '<=', now());
+
+            $count = $drafts->count();
+            
+            \Illuminate\Support\Facades\Log::info("Found {$count} draft applications", [
+                'timestamp' => now()->toDateTimeString(),
+                'count' => $count
+            ]);
+            
+            if ($count > 0) {
+                $drafts->delete();
+                \Illuminate\Support\Facades\Log::info("Deleted {$count} draft applications", [
+                    'timestamp' => now()->toDateTimeString(),
+                    'deleted_count' => $count
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Error deleting draft applications", [
+                'timestamp' => now()->toDateTimeString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 }

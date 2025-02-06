@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('lifelong_learnings', function (Blueprint $table) {
             $table->id();
             $table->string('applicant_id');
-            $table->enum('type', ['hobby', 'skill', 'work', 'volunteer', 'travel']);
-            $table->text('description');
+            $table->enum('type', ['hobby', 'skill', 'work', 'volunteer', 'travel'])->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
 
             $table->foreign('applicant_id')

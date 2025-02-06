@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('creative_works', function (Blueprint $table) {
             $table->id();
             $table->string('applicant_id');
-            $table->string('title');
-            $table->text('description');
-            $table->text('significance');
-            $table->date('date_completed');
-            $table->string('corroborating_body');
+            $table->string('title')->nullable();
+            $table->text('description')->nullable();
+            $table->text('significance')->nullable();
+            $table->date('date_completed')->nullable();
+            $table->string('corroborating_body')->nullable();
             $table->timestamps();
 
             $table->foreign('applicant_id')

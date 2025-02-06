@@ -18,6 +18,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Widgets\UniversityInfoWidget;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,8 +30,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandLogo(asset('images/SPUPLogo.png'))
+            ->brandLogoHeight('50px')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Green,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -40,8 +44,8 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
                 Widgets\StatsOverviewWidget::class,
+                \App\Filament\Widgets\UniversityInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -56,6 +60,17 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                ->slug('my-profile')
+                ->setTitle('My Profile')
+                ->setNavigationLabel('My Profile')
+                ->setIcon('heroicon-o-user')
+                ->setSort(10)
+                ->canAccess(true)
+                ->shouldRegisterNavigation(true)
+                ->shouldShowBrowserSessionsForm(true)
             ]);
     }
 }

@@ -33,11 +33,14 @@ export default function LifelongLearningStep({
                     <div key={index} className="border p-4 rounded-lg space-y-4">
                         <TextArea
                             value={hobby.description}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${errors[`hobbies.${index}.description`] ? 'border-red-500' : ''}`}
                             rows={3}
                             placeholder="Describe your hobby and its learning value..."
                             onChange={(e) => handleArrayFieldChange('hobbies', index, 'description', e.target.value)}
                         />
+                        {errors[`hobbies.${index}.description`] && (
+                            <InputError message={errors[`hobbies.${index}.description`]} className="mt-2" />
+                        )}
                         {formData.hobbies.length > 1 && (
                             <button
                                 type="button"
@@ -69,11 +72,14 @@ export default function LifelongLearningStep({
                     <div key={index} className="border p-4 rounded-lg space-y-4">
                         <TextArea
                             value={skill.description}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${errors[`specialSkills.${index}.description`] ? 'border-red-500' : ''}`}
                             rows={3}
                             placeholder="Describe your special skill and its relevance..."
                             onChange={(e) => handleArrayFieldChange('specialSkills', index, 'description', e.target.value)}
                         />
+                        {errors[`specialSkills.${index}.description`] && (
+                            <InputError message={errors[`specialSkills.${index}.description`]} className="mt-2" />
+                        )}
                         {formData.specialSkills.length > 1 && (
                             <button
                                 type="button"
@@ -105,11 +111,14 @@ export default function LifelongLearningStep({
                     <div key={index} className="border p-4 rounded-lg space-y-4">
                         <TextArea
                             value={activity.description}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${errors[`workActivities.${index}.description`] ? 'border-red-500' : ''}`}
                             rows={4}
                             placeholder="Describe the activity and what new skills or knowledge you gained..."
                             onChange={(e) => handleArrayFieldChange('workActivities', index, 'description', e.target.value)}
                         />
+                        {errors[`workActivities.${index}.description`] && (
+                            <InputError message={errors[`workActivities.${index}.description`]} className="mt-2" />
+                        )}
                         {formData.workActivities.length > 1 && (
                             <button
                                 type="button"
@@ -141,11 +150,14 @@ export default function LifelongLearningStep({
                     <div key={index} className="border p-4 rounded-lg space-y-4">
                         <TextArea
                             value={activity.description}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${errors[`volunteerActivities.${index}.description`] ? 'border-red-500' : ''}`}
                             rows={4}
                             placeholder="Describe your volunteer activity and its learning value..."
                             onChange={(e) => handleArrayFieldChange('volunteerActivities', index, 'description', e.target.value)}
                         />
+                        {errors[`volunteerActivities.${index}.description`] && (
+                            <InputError message={errors[`volunteerActivities.${index}.description`]} className="mt-2" />
+                        )}
                         {formData.volunteerActivities.length > 1 && (
                             <button
                                 type="button"
@@ -177,11 +189,14 @@ export default function LifelongLearningStep({
                     <div key={index} className="border p-4 rounded-lg space-y-4">
                         <TextArea
                             value={travel.description}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${errors[`travels.${index}.description`] ? 'border-red-500' : ''}`}
                             rows={4}
                             placeholder="Describe your travel experience, purpose, and learning outcomes..."
                             onChange={(e) => handleArrayFieldChange('travels', index, 'description', e.target.value)}
                         />
+                        {errors[`travels.${index}.description`] && (
+                            <InputError message={errors[`travels.${index}.description`]} className="mt-2" />
+                        )}
                         {formData.travels.length > 1 && (
                             <button
                                 type="button"

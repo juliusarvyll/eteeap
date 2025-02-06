@@ -9,6 +9,7 @@ class WorkExperience extends Model
 {
     protected $fillable = [
         'applicant_id',
+        'employment_type',
         'designation',
         'dateFrom',
         'dateTo',
@@ -18,7 +19,13 @@ class WorkExperience extends Model
         'supervisorName',
         'reasonForLeaving',
         'responsibilities',
-        'documents'
+        'documents',
+        'reference1_name',
+        'reference1_contact',
+        'reference2_name',
+        'reference2_contact',
+        'reference3_name',
+        'reference3_contact',
     ];
 
     protected $casts = [

@@ -11,6 +11,9 @@ export default function HonorsAwardsStep({
     addArrayItem,
     removeArrayItem
 }) {
+    // Add debug logs
+    console.log('HonorsAwardsStep errors:', errors);
+
     return (
         <div className="space-y-8">
             <div>
@@ -46,7 +49,7 @@ export default function HonorsAwardsStep({
                             <div>
                                 <InputLabel value="Award/Honor Title" required />
                                 <TextInput
-                                    name="title"
+                                    name={`academicAwards.${index}.title`}
                                     value={award.title}
                                     onChange={(e) => handleArrayFieldChange('academicAwards', index, 'title', e.target.value)}
                                     className={`mt-1 block w-full ${errors[`academicAwards.${index}.title`] ? 'border-red-500' : ''}`}
@@ -59,7 +62,7 @@ export default function HonorsAwardsStep({
                             <div>
                                 <InputLabel value="Awarding Institution" required />
                                 <TextInput
-                                    name="institution"
+                                    name={`academicAwards.${index}.institution`}
                                     value={award.institution}
                                     onChange={(e) => handleArrayFieldChange('academicAwards', index, 'institution', e.target.value)}
                                     className={`mt-1 block w-full ${errors[`academicAwards.${index}.institution`] ? 'border-red-500' : ''}`}
@@ -73,7 +76,7 @@ export default function HonorsAwardsStep({
                                 <InputLabel value="Date Received" required />
                                 <TextInput
                                     type="date"
-                                    name="dateReceived"
+                                    name={`academicAwards.${index}.dateReceived`}
                                     value={award.dateReceived}
                                     onChange={(e) => handleArrayFieldChange('academicAwards', index, 'dateReceived', e.target.value)}
                                     className={`mt-1 block w-full ${errors[`academicAwards.${index}.dateReceived`] ? 'border-red-500' : ''}`}
@@ -86,7 +89,7 @@ export default function HonorsAwardsStep({
                             <div>
                                 <InputLabel value="Description" required />
                                 <TextArea
-                                    name="description"
+                                    name={`academicAwards.${index}.description`}
                                     value={award.description}
                                     onChange={(e) => handleArrayFieldChange('academicAwards', index, 'description', e.target.value)}
                                     className={`mt-1 block w-full ${errors[`academicAwards.${index}.description`] ? 'border-red-500' : ''}`}
@@ -101,7 +104,7 @@ export default function HonorsAwardsStep({
                                 <InputLabel value="Supporting Document" />
                                 <input
                                     type="file"
-                                    name="document"
+                                    name={`academicAwards.${index}.document`}
                                     onChange={(e) => handleArrayFieldChange('academicAwards', index, 'document', e.target.files[0])}
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     className={`mt-1 block w-full ${errors[`academicAwards.${index}.document`] ? 'border-red-500' : ''}`}
@@ -151,21 +154,27 @@ export default function HonorsAwardsStep({
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {formData.communityAwards.map((award, index) => (
+                            {formData.communityAwards?.map((award, index) => (
                                 <tr key={index}>
                                     <td className="px-6 py-4">
                                         <TextInput
                                             value={award.title}
-                                            className="block w-full"
+                                            className={`block w-full ${errors[`communityAwards.${index}.title`] ? 'border-red-500' : ''}`}
                                             onChange={(e) => handleArrayFieldChange('communityAwards', index, 'title', e.target.value)}
                                         />
+                                        {errors[`communityAwards.${index}.title`] && (
+                                            <InputError message={errors[`communityAwards.${index}.title`]} className="mt-2" />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <TextInput
                                             value={award.organization}
-                                            className="block w-full"
+                                            className={`block w-full ${errors[`communityAwards.${index}.organization`] ? 'border-red-500' : ''}`}
                                             onChange={(e) => handleArrayFieldChange('communityAwards', index, 'organization', e.target.value)}
                                         />
+                                        {errors[`communityAwards.${index}.organization`] && (
+                                            <InputError message={errors[`communityAwards.${index}.organization`]} className="mt-2" />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <TextInput
@@ -174,6 +183,9 @@ export default function HonorsAwardsStep({
                                             className="block w-full"
                                             onChange={(e) => handleArrayFieldChange('communityAwards', index, 'dateAwarded', e.target.value)}
                                         />
+                                        {errors[`communityAwards.${index}.dateAwarded`] && (
+                                            <InputError message={errors[`communityAwards.${index}.dateAwarded`]} className="mt-2" />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         {formData.communityAwards.length > 1 && (
@@ -225,21 +237,27 @@ export default function HonorsAwardsStep({
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {formData.workAwards.map((award, index) => (
+                            {formData.workAwards?.map((award, index) => (
                                 <tr key={index}>
                                     <td className="px-6 py-4">
                                         <TextInput
                                             value={award.title}
-                                            className="block w-full"
+                                            className={`block w-full ${errors[`workAwards.${index}.title`] ? 'border-red-500' : ''}`}
                                             onChange={(e) => handleArrayFieldChange('workAwards', index, 'title', e.target.value)}
                                         />
+                                        {errors[`workAwards.${index}.title`] && (
+                                            <InputError message={errors[`workAwards.${index}.title`]} className="mt-2" />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <TextInput
                                             value={award.organization}
-                                            className="block w-full"
+                                            className={`block w-full ${errors[`workAwards.${index}.organization`] ? 'border-red-500' : ''}`}
                                             onChange={(e) => handleArrayFieldChange('workAwards', index, 'organization', e.target.value)}
                                         />
+                                        {errors[`workAwards.${index}.organization`] && (
+                                            <InputError message={errors[`workAwards.${index}.organization`]} className="mt-2" />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <TextInput
@@ -248,6 +266,9 @@ export default function HonorsAwardsStep({
                                             className="block w-full"
                                             onChange={(e) => handleArrayFieldChange('workAwards', index, 'dateAwarded', e.target.value)}
                                         />
+                                        {errors[`workAwards.${index}.dateAwarded`] && (
+                                            <InputError message={errors[`workAwards.${index}.dateAwarded`]} className="mt-2" />
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         {formData.workAwards.length > 1 && (

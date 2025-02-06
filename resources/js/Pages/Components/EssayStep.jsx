@@ -29,8 +29,8 @@ export default function EssayStep({
 
     const handleConfirmSubmit = async () => {
         try {
-            // Explicitly call onSubmit which will trigger the step save
-            onSubmit(null);
+            // Pass the essay content to onSubmit
+            await onSubmit(formData.essay);
             setShowConfirmation(false);
         } catch (error) {
             console.error('Submission failed:', error);
