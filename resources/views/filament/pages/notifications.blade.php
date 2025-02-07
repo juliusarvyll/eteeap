@@ -71,7 +71,7 @@
                 </div>
             @empty
                 <div class="p-8 text-center fi-card rounded-lg">
-                    <x-heroicon-o-bell-alert class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500" />
+                    <x-heroicon-o-bell-alert class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500" />
                     <h3 class="mt-4 text-sm font-medium fi-card-header">
                         No notifications
                     </h3>

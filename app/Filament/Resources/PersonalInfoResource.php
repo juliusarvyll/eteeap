@@ -578,7 +578,21 @@ class PersonalInfoResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('status', 'pending')->count();
+        return static::getModel()::query()
+            ->where('status', 'pending')
+            ->count();
+    }
+
+    protected static function getNavigationBadgePollingInterval(): ?string
+    {
+        return '10s';  // Will update every 10 seconds
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::query()->where('status', 'pending')->count() > 0 
+            ? 'warning'
+            : 'primary';
     }
 
     public static function deleteDraftApplications(): void
